@@ -18,10 +18,7 @@ import {
   setRequestHandled,
   teach,
 } from "../lib/api";
-
-const isEmail = (c: string) => c.includes("@");
-const contactHref = (c: string) =>
-  isEmail(c) ? `mailto:${c.trim()}` : `tel:${c.replace(/[^0-9+]/g, "")}`;
+import { contactHref, isEmail } from "../lib/contact";
 
 type Tab = "questions" | "gaps" | "kb" | "inbox" | "activity";
 
@@ -485,12 +482,11 @@ function InboxTab() {
 
   async function toggleHandled(r: RequestEntry) {
     const next = !r.handled;
-    setItems((prev) => prev?.map((x) => (x.id === r.id ? { ...x, handled: next } : x)) ?? prev);
+    const patch = (h: boolean) =>
+      setItems((prev) => prev?.map((x) => (x.id === r.id ? { ...x, handled: h } : x)) ?? prev);
+    patch(next); // optimistic
     const res = await setRequestHandled(r.id, next);
-    if (!res.ok) {
-      // Revert the optimistic update if the write failed.
-      setItems((prev) => prev?.map((x) => (x.id === r.id ? { ...x, handled: !next } : x)) ?? prev);
-    }
+    if (!res.ok) patch(!next); // revert on failure
   }
 
   if (!items) return <Loading label="Loading inbox" />;

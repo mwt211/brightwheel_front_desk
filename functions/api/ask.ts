@@ -159,6 +159,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
 
   const answer = normalize(result, kb);
   const status = deriveStatus(answer);
+  // Authoritative provenance: we know the child in scope and the exact section
+  // the prompt asks the model to cite, so the "from your child's record" signal
+  // is set here, not reconstructed from the citation string in the UI.
+  const fromRecord =
+    !!child && answer.citations.some((c) => c.section === `${child.firstName}'s day`);
   const id = await logQuestion(env.DB, {
     text,
     answer: answer.answer,
@@ -170,7 +175,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     citations: answer.citations,
   });
 
-  return json({ ...answer, status, question_id: id });
+  return json({ ...answer, status, question_id: id, from_record: fromRecord });
 };
 
 type Normalized = {

@@ -29,9 +29,18 @@ export type ChildRecord = {
 
 const CHILDREN = (data as { children: ChildRecord[] }).children;
 
+// Identity-only projection for the "viewing as" selector; the private record and
+// account never leave the server. Built once at module load.
+const CHILD_LIST = CHILDREN.map(({ id, name, firstName, room }) => ({
+  id,
+  name,
+  firstName,
+  room,
+}));
+
 /** Public list for the parent "viewing as" selector: identity only, no record. */
 export function listChildren(): { id: string; name: string; firstName: string; room: string }[] {
-  return CHILDREN.map(({ id, name, firstName, room }) => ({ id, name, firstName, room }));
+  return CHILD_LIST;
 }
 
 export function getChild(id: string | undefined | null): ChildRecord | null {

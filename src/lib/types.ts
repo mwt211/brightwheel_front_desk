@@ -42,6 +42,8 @@ export type AnswerPayload = {
   question_id?: number;
   /** True when answered on-device from the cached handbook (no network). */
   offline?: boolean;
+  /** Set server-side when the answer was grounded in the family record. */
+  from_record?: boolean;
 };
 
 export type ChatMessage =

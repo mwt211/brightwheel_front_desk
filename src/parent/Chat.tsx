@@ -19,14 +19,13 @@ import {
   speechLang,
   type Lang,
 } from "./i18n";
+import { telHref } from "../lib/contact";
 
 function uid(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : String(Math.random());
 }
-
-const telHref = (value: string) => `tel:${value.replace(/[^0-9+]/g, "")}`;
 
 const actionable = (actions?: SuggestedAction[]) =>
   actions?.filter((a) => a.action !== "none") ?? [];
@@ -504,10 +503,9 @@ function HelpfulRow({
 
 function TrustRow({ lang, payload }: { lang: Lang; payload: AnswerPayload }) {
   const dot = { high: "bg-brand-500", medium: "bg-amber", low: "bg-ink/30" } as const;
-  // Personal answers cite the family record ("Mateo's day"), so the trust line
-  // names that source instead of the handbook.
-  const fromRecord = payload.citations?.some((c) => /'s day$/.test(c.section));
-  const label = fromRecord
+  // Personal answers are grounded in the family record, flagged server-side, so
+  // the trust line names that source instead of the handbook.
+  const label = payload.from_record
     ? STRINGS[lang].fromRecord
     : STRINGS[lang].trust[payload.confidence];
   return (
