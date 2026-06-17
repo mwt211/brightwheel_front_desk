@@ -9,6 +9,7 @@ import {
   operatorGate,
 } from "../_shared/db";
 import { runJson } from "../_shared/llm";
+import { isHealthContent } from "../_shared/safety";
 
 const GAP_SCHEMA = {
   type: "object",
@@ -133,6 +134,20 @@ export const onRequestPost: PagesFunction<Env> = async ({ env, request }) => {
   const sectionBody = String(body.body ?? "").trim();
   if (!title || !sectionBody) {
     return json({ error: "Missing title or body." }, 400);
+  }
+  // Deterministic backstop for the review-only rule: health, medication, and
+  // child-safety content is never one-tap published, even if the UI flag is
+  // bypassed or the model failed to set reviewOnly. It must be added by hand in
+  // the Handbook editor after review.
+  if (isHealthContent(`${title}\n${sectionBody}`)) {
+    return json(
+      {
+        error: "review_required",
+        message:
+          "This reads as health, medication, or safety content. For safety it cannot be published in one tap; add it manually in the Handbook editor after review.",
+      },
+      422,
+    );
   }
 
   const { kb, version } = await getKb(env.DB);

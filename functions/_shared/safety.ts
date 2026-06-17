@@ -47,6 +47,26 @@ const SAFETY =
 const SPANISH =
   /[ñáéíóú¿¡]|\b(mi hijo|mi hija|tiene|puede|cu[aá]nto|debo|deber[ií]a|est[aá]|enfermo|enferma|fiebre|hola|gracias|por favor|necesito|ayuda)\b/i;
 
+// Gate for one-tap publishing to the handbook, NOT the parent-question screen.
+// The screen above deliberately over-triggers, because escalating a parent's
+// question to a human is always safe. Here over-triggering would wrongly block
+// an operator from publishing ordinary policy (a "drop-off congestion" or "room
+// temperature" section), so this is a tighter, purpose-built match for medical
+// and health GUIDANCE. Administrative policy (e.g. immunization records) is
+// intentionally allowed; it is not medical advice.
+// Leading word boundary only (like the screen patterns above), so stems match
+// inflected forms: "vomit" -> "vomiting", "diarrh" -> "diarrhea", "injur" ->
+// "injury". The terms are specific enough that a leading boundary alone does not
+// over-match ordinary policy wording.
+const HEALTH_GUIDANCE =
+  /\b(fever|febrile|vomit|diarrh|rash(es)?\b|pink ?eye|conjunctivit|contagious|symptom|illness|sick child|medication|medicine|dosage|prescri|acetaminophen|ibuprofen|tylenol|benadryl|motrin|allergic reaction|anaphyla|epipen|inhaler|seizure|injur|first aid|exclusion|quarantine|incubation)/i;
+
+/** True if text reads as medical or health guidance that must not be one-tap
+ * published to the handbook; it has to be added by hand after review. */
+export function isHealthContent(text: string): boolean {
+  return HEALTH_GUIDANCE.test(text);
+}
+
 // Trim to a sentence (or word) boundary so the quote we SHOW a parent never
 // cuts off mid-word.
 function clip(text: string, max: number): string {

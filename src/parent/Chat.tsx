@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { AnswerPayload, CenterKB, Child, ChatMessage, SuggestedAction } from "../lib/types";
+import { CONFIDENCE_DOT } from "../lib/types";
 import { fetchKb, fetchChildren, leaveRequest, sendFeedback } from "../lib/api";
 import { createRecognizer, isVoiceInputSupported, type Recognizer } from "./voice";
 import {
@@ -29,6 +30,9 @@ function uid(): string {
 
 const actionable = (actions?: SuggestedAction[]) =>
   actions?.filter((a) => a.action !== "none") ?? [];
+
+// Voice support is environment-stable; check once, not on every render.
+const VOICE_SUPPORTED = isVoiceInputSupported();
 
 export function Chat() {
   const [center, setCenter] = useState<{
@@ -288,7 +292,7 @@ export function Chat() {
         onSend={() => send(input)}
         listening={listening}
         onToggleVoice={toggleVoice}
-        voiceSupported={isVoiceInputSupported()}
+        voiceSupported={VOICE_SUPPORTED}
         onToggleLang={() => setLang((l) => (l === "es" ? "en" : "es"))}
         disabled={loading}
       />
@@ -502,7 +506,6 @@ function HelpfulRow({
 }
 
 function TrustRow({ lang, payload }: { lang: Lang; payload: AnswerPayload }) {
-  const dot = { high: "bg-brand-500", medium: "bg-amber", low: "bg-ink/30" } as const;
   // Personal answers are grounded in the family record, flagged server-side, so
   // the trust line names that source instead of the handbook.
   const label = payload.from_record
@@ -510,7 +513,7 @@ function TrustRow({ lang, payload }: { lang: Lang; payload: AnswerPayload }) {
     : STRINGS[lang].trust[payload.confidence];
   return (
     <div className="flex items-center gap-1.5 text-[11px] text-ink/55 pl-1">
-      <span className={`inline-block w-1.5 h-1.5 rounded-full ${dot[payload.confidence]}`} />
+      <span className={`inline-block w-1.5 h-1.5 rounded-full ${CONFIDENCE_DOT[payload.confidence]}`} />
       {label}
     </div>
   );

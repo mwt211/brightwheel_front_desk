@@ -153,7 +153,7 @@ export async function teach(input: {
   title: string;
   body: string;
   theme?: string;
-}): Promise<{ ok?: boolean; version?: number; error?: string }> {
+}): Promise<{ ok?: boolean; version?: number; error?: string; message?: string }> {
   const res = await fetch("/api/questions", {
     method: "POST",
     headers: { "content-type": "application/json", ...opHeaders() },

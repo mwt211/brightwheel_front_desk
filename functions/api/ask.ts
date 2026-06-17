@@ -8,7 +8,7 @@ import {
 import { screen } from "../_shared/safety";
 import { runJson, type ChatMsg } from "../_shared/llm";
 import { buildSystemPrompt } from "../_shared/prompt";
-import { getChild } from "../_shared/children";
+import { getChild, familyDaySection } from "../_shared/children";
 
 type HistoryMsg = { role: "user" | "assistant"; content: string };
 
@@ -163,7 +163,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   // the prompt asks the model to cite, so the "from your child's record" signal
   // is set here, not reconstructed from the citation string in the UI.
   const fromRecord =
-    !!child && answer.citations.some((c) => c.section === `${child.firstName}'s day`);
+    !!child && answer.citations.some((c) => c.section === familyDaySection(child.firstName));
   const id = await logQuestion(env.DB, {
     text,
     answer: answer.answer,

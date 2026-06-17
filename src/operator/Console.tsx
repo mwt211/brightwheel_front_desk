@@ -19,6 +19,7 @@ import {
   teach,
 } from "../lib/api";
 import { contactHref, isEmail } from "../lib/contact";
+import { CONFIDENCE_DOT } from "../lib/types";
 
 type Tab = "questions" | "gaps" | "kb" | "inbox" | "activity";
 
@@ -172,17 +173,13 @@ function GapsTab() {
     }
   }
 
-  async function approve(c: GapCluster) {
-    const res = await teach({
-      title: c.draftSection.title,
-      body: c.draftSection.body,
-      theme: c.theme,
-    });
+  async function approve(c: GapCluster, title: string, body: string) {
+    const res = await teach({ title, body, theme: c.theme });
     if (res.ok) {
-      setToast(`Added "${c.draftSection.title}" to the handbook. The bot can answer it now.`);
+      setToast(`Added "${title}" to the handbook. The bot can answer it now.`);
       setClusters((prev) => prev?.filter((x) => x.theme !== c.theme) ?? null);
     } else {
-      setToast(res.error ?? "Could not save.");
+      setToast(res.message ?? res.error ?? "Could not save.");
     }
   }
 
@@ -216,7 +213,7 @@ function GapsTab() {
       )}
 
       {clusters?.map((c) => (
-        <GapCard key={c.theme} cluster={c} onApprove={() => approve(c)} />
+        <GapCard key={c.theme} cluster={c} onApprove={(title, body) => approve(c, title, body)} />
       ))}
     </div>
   );
@@ -227,7 +224,7 @@ function GapCard({
   onApprove,
 }: {
   cluster: GapCluster;
-  onApprove: () => void;
+  onApprove: (title: string, body: string) => void | Promise<void>;
 }) {
   const [title, setTitle] = useState(cluster.draftSection.title);
   const [body, setBody] = useState(cluster.draftSection.body);
@@ -282,9 +279,7 @@ function GapCard({
         <button
           onClick={async () => {
             setSaving(true);
-            cluster.draftSection.title = title;
-            cluster.draftSection.body = body;
-            await onApprove();
+            await onApprove(title, body);
             setSaving(false);
           }}
           disabled={saving}
@@ -804,15 +799,9 @@ function StatusBadge({ status }: { status: QuestionStatus }) {
 }
 
 function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
-  const dot =
-    confidence === "high"
-      ? "bg-brand-500"
-      : confidence === "medium"
-        ? "bg-amber"
-        : "bg-ink/30";
   return (
     <span className="inline-flex items-center gap-1 text-[11px] text-ink/50">
-      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+      <span className={`w-1.5 h-1.5 rounded-full ${CONFIDENCE_DOT[confidence]}`} />
       {confidence}
     </span>
   );

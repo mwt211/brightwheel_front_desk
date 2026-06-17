@@ -2,6 +2,13 @@
 
 export type Confidence = "high" | "medium" | "low";
 
+/** Confidence dot color, shared by the parent trust row and the operator badge. */
+export const CONFIDENCE_DOT: Record<Confidence, string> = {
+  high: "bg-brand-500",
+  medium: "bg-amber",
+  low: "bg-ink/30",
+};
+
 export type Category =
   | "hours_calendar"
   | "tuition_fees"

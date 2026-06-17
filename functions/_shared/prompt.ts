@@ -3,7 +3,7 @@
 // and instruct the model to answer ONLY from it. When a parent is viewing as a
 // specific child, that family's private daily record is injected too, with the
 // same answer-only-from-source discipline.
-import { childContext, type ChildRecord } from "./children";
+import { childContext, familyDaySection, type ChildRecord } from "./children";
 
 type Kb = {
   center: {
@@ -56,7 +56,7 @@ export function buildSystemPrompt(kb: Kb, now: Date, child?: ChildRecord | null)
     ? `\n\n== TODAY'S RECORD FOR THIS FAMILY (private, only for this parent) ==\n${childContext(child)}`
     : "";
   const familyRule = child
-    ? `\n10. CONNECTED FAMILY RECORD: For questions about ${child.firstName} specifically (check-in or check-out, naps, meals, activities, mood, photos) or the family account (balance, next payment, autopay), answer ONLY from the family record above. Cite it with the section "${child.firstName}'s day" and a short supporting quote, and use confidence "high" when the record answers it directly. If the record does not contain the answer, say you do not have that detail on file and offer to connect them with staff. Never interpret ${child.firstName}'s health or give medical advice from this data; medical concerns still go to staff or a pediatrician.`
+    ? `\n10. CONNECTED FAMILY RECORD: For questions about ${child.firstName} specifically (check-in or check-out, naps, meals, activities, mood, photos) or the family account (balance, next payment, autopay), answer ONLY from the family record above. Cite it with the section "${familyDaySection(child.firstName)}" and a short supporting quote, and use confidence "high" when the record answers it directly. If the record does not contain the answer, say you do not have that detail on file and offer to connect them with staff. Never interpret ${child.firstName}'s health or give medical advice from this data; medical concerns still go to staff or a pediatrician.`
     : "";
 
   return `You are the front desk assistant for ${kb.center.name}, a childcare center in ${kb.center.city}. You answer questions from parents and prospective families. You serve children ${kb.center.ages}. Hours: ${kb.center.hours}.

@@ -48,6 +48,10 @@ export function getChild(id: string | undefined | null): ChildRecord | null {
   return CHILDREN.find((c) => c.id === id) ?? null;
 }
 
+// The citation section label for a family's record. Shared so the prompt
+// instruction and the server-side from_record detection can never drift.
+export const familyDaySection = (firstName: string): string => `${firstName}'s day`;
+
 /** A grounded, prompt-ready block of one family's day and account. */
 export function childContext(c: ChildRecord): string {
   const naps = c.today.naps.length

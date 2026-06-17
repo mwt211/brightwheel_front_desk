@@ -210,6 +210,7 @@ export function answerOffline(kb: CenterKB, text: string, lang: Lang): AnswerPay
   // Best-matching handbook section.
   let best: { section: { title: string; body: string }; score: number } | null = null;
   for (const section of kb.sections ?? []) {
+    // Title counted twice so a title-word match weighs more than a body match.
     const hay = tokenize(section.title + " " + section.title + " " + section.body);
     const set = new Set(hay);
     const score = tokens.reduce((n, t) => n + (set.has(t) ? 1 : 0), 0);
