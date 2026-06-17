@@ -14,8 +14,8 @@ that underpins both. For how they fit together see
 - **Why:** Handbooks are unsearchable on a phone and operators can't always pick up. The whole point is a fast answer in the moment, the way the parent actually asks.
 
 ### Voice input
-- **What:** A microphone button dictates the question using the browser's Web Speech API; it is feature-detected and silently hidden where unsupported. Voice recognition is currently tuned to English; typed questions are answered in any supported language.
-- **Why:** Parents are often hands-full (holding a child, in the pickup line, driving up). Voice removes the friction of typing and improves accessibility.
+- **What:** A microphone button dictates the question using the browser's Web Speech API; it is feature-detected and silently hidden where unsupported. An EN/ES toggle next to the mic sets the recognition language (defaulting to the browser's), so dictation works in English and Spanish.
+- **Why:** Parents are often hands-full (holding a child, in the pickup line, driving up). Voice removes the friction of typing, and supporting Spanish dictation extends the multilingual promise to the voice path, not just typing.
 
 ### Starter questions
 - **What:** The welcome screen offers the most common questions as one-tap chips (hours, infant tuition, fever, lunch, tours).

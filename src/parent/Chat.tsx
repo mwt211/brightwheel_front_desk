@@ -22,6 +22,12 @@ const telHref = (value: string) => `tel:${value.replace(/[^0-9+]/g, "")}`;
 const actionable = (actions?: SuggestedAction[]) =>
   actions?.filter((a) => a.action !== "none") ?? [];
 
+// Default the voice-recognition language to the browser's; the parent can switch.
+function detectVoiceLang(): string {
+  const l = typeof navigator !== "undefined" ? navigator.language?.toLowerCase() : "";
+  return l && l.startsWith("es") ? "es-US" : "en-US";
+}
+
 export function Chat() {
   const [center, setCenter] = useState<{
     name: string;
@@ -32,6 +38,7 @@ export function Chat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const [voiceLang, setVoiceLang] = useState(detectVoiceLang);
   const [requestModal, setRequestModal] = useState<{
     kind: "tour" | "message";
     relatedId?: number;
@@ -91,14 +98,17 @@ export function Chat() {
       recognizerRef.current?.stop();
       return;
     }
-    const rec = createRecognizer({
-      onResult: (transcript, isFinal) => {
-        setInput(transcript);
-        if (isFinal) setListening(false);
+    const rec = createRecognizer(
+      {
+        onResult: (transcript, isFinal) => {
+          setInput(transcript);
+          if (isFinal) setListening(false);
+        },
+        onError: () => setListening(false),
+        onEnd: () => setListening(false),
       },
-      onError: () => setListening(false),
-      onEnd: () => setListening(false),
-    });
+      voiceLang,
+    );
     if (!rec) return;
     recognizerRef.current = rec;
     setListening(true);
@@ -176,6 +186,10 @@ export function Chat() {
         listening={listening}
         onToggleVoice={toggleVoice}
         voiceSupported={isVoiceInputSupported()}
+        voiceLang={voiceLang}
+        onCycleVoiceLang={() =>
+          setVoiceLang((l) => (l.startsWith("es") ? "en-US" : "es-US"))
+        }
         disabled={loading}
       />
 
@@ -360,6 +374,8 @@ function Composer({
   listening,
   onToggleVoice,
   voiceSupported,
+  voiceLang,
+  onCycleVoiceLang,
   disabled,
 }: {
   input: string;
@@ -368,23 +384,36 @@ function Composer({
   listening: boolean;
   onToggleVoice: () => void;
   voiceSupported: boolean;
+  voiceLang: string;
+  onCycleVoiceLang: () => void;
   disabled: boolean;
 }) {
+  const isES = voiceLang.startsWith("es");
   return (
     <div className="sticky bottom-0 bg-cream border-t border-brand-100 px-3 py-2.5">
       <div className="flex items-end gap-2">
         {voiceSupported && (
-          <button
-            onClick={onToggleVoice}
-            aria-label="Voice input"
-            className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center border transition ${
-              listening
-                ? "bg-amber text-white border-amber animate-pulse"
-                : "bg-white text-brand-700 border-brand-200 hover:border-brand-400"
-            }`}
-          >
-            <MicIcon />
-          </button>
+          <>
+            <button
+              onClick={onCycleVoiceLang}
+              aria-label="Voice language"
+              title={`Voice language: ${isES ? "Spanish" : "English"} (tap to switch)`}
+              className="shrink-0 w-9 h-10 rounded-full border border-brand-200 bg-white text-brand-700 text-[11px] font-semibold hover:border-brand-400 transition"
+            >
+              {isES ? "ES" : "EN"}
+            </button>
+            <button
+              onClick={onToggleVoice}
+              aria-label="Voice input"
+              className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center border transition ${
+                listening
+                  ? "bg-amber text-white border-amber animate-pulse"
+                  : "bg-white text-brand-700 border-brand-200 hover:border-brand-400"
+              }`}
+            >
+              <MicIcon />
+            </button>
+          </>
         )}
         <textarea
           value={input}

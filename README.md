@@ -25,6 +25,7 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Full system walkthrough and request lifecycle. |
 | [docs/API.md](docs/API.md) | Endpoint reference. |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Rationale, tradeoffs, brightwheel alignment, roadmap. |
+| [docs/PROVENANCE.md](docs/PROVENANCE.md) | What we reused (open source, prior projects) vs. built, and why. |
 | [functions/README.md](functions/README.md) | Backend layer (Pages Functions). |
 | [docs/demo-script.md](docs/demo-script.md) | A ~2 minute demo walkthrough. |
 

@@ -28,16 +28,21 @@ export function isVoiceInputSupported(): boolean {
   return getRecognitionCtor() !== null;
 }
 
-export function createRecognizer(handlers: {
-  onResult: (transcript: string, isFinal: boolean) => void;
-  onError?: (message: string) => void;
-  onEnd?: () => void;
-}): Recognizer | null {
+export function createRecognizer(
+  handlers: {
+    onResult: (transcript: string, isFinal: boolean) => void;
+    onError?: (message: string) => void;
+    onEnd?: () => void;
+  },
+  lang = "en-US",
+): Recognizer | null {
   const Ctor = getRecognitionCtor();
   if (!Ctor) return null;
 
   const recognition = new Ctor();
-  recognition.lang = "en-US";
+  // The Web Speech API recognizes one language per session, so the caller picks
+  // it (English or Spanish here) rather than us hardcoding English.
+  recognition.lang = lang;
   recognition.continuous = false;
   recognition.interimResults = true;
 
