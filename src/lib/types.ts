@@ -99,6 +99,7 @@ export type RequestEntry = {
   contact: string;
   message: string;
   related_question_id: number | null;
+  urgent: boolean;
 };
 
 export type GapCluster = {

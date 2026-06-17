@@ -53,14 +53,31 @@ export async function runJson<T = Record<string, unknown>>(
 export function extractJson<T = Record<string, unknown>>(text: string): T | null {
   if (!text) return null;
   const cleaned = text.replace(/```json\s*|\s*```/gi, "").trim();
-  const start = cleaned.indexOf("{");
-  if (start === -1) return tryParse<T>(cleaned);
 
+  const whole = tryParse<T>(cleaned);
+  if (whole && typeof whole === "object") return whole;
+
+  // Try each "{" as a candidate object start and return the first that parses,
+  // so leading prose containing stray braces does not abort the search.
+  for (
+    let start = cleaned.indexOf("{");
+    start !== -1;
+    start = cleaned.indexOf("{", start + 1)
+  ) {
+    const slice = balancedSlice(cleaned, start);
+    if (!slice) continue;
+    const parsed = tryParse<T>(slice);
+    if (parsed && typeof parsed === "object") return parsed;
+  }
+  return null;
+}
+
+function balancedSlice(s: string, start: number): string | null {
   let depth = 0;
   let inStr = false;
   let esc = false;
-  for (let i = start; i < cleaned.length; i += 1) {
-    const ch = cleaned[i];
+  for (let i = start; i < s.length; i += 1) {
+    const ch = s[i];
     if (inStr) {
       if (esc) esc = false;
       else if (ch === "\\") esc = true;
@@ -69,10 +86,10 @@ export function extractJson<T = Record<string, unknown>>(text: string): T | null
     else if (ch === "{") depth += 1;
     else if (ch === "}") {
       depth -= 1;
-      if (depth === 0) return tryParse<T>(cleaned.slice(start, i + 1));
+      if (depth === 0) return s.slice(start, i + 1);
     }
   }
-  return tryParse<T>(cleaned.slice(start));
+  return null;
 }
 
 function tryParse<T>(s: string): T | null {

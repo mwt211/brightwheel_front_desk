@@ -67,11 +67,28 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   if (text.length > MAX_INPUT)
     return json({ error: "Question is too long." }, 413);
 
-  // Cost guard: cap total Bedrock-backed questions per rolling 24h.
-  const cap = Number(
-    (env as Env & { DAILY_QUESTION_CAP?: string }).DAILY_QUESTION_CAP ??
-      DEFAULT_DAILY_CAP,
-  );
+  const { kb } = await getKb(env.DB);
+
+  // Layer 1: the deterministic safety net runs FIRST, before the rate cap or
+  // the model, so an emergency is never swallowed by a cost guard or a quota.
+  const intercept = screen(text, kb as Parameters<typeof screen>[1]);
+  if (intercept) {
+    const id = await logQuestion(env.DB, {
+      text,
+      answer: intercept.answer,
+      confidence: intercept.confidence,
+      category: intercept.category,
+      status: intercept.status,
+      needs_human: intercept.needs_human,
+      escalation_reason: intercept.escalation_reason,
+      citations: intercept.citations,
+    });
+    return json({ ...intercept, question_id: id });
+  }
+
+  // Cost guard: cap model-backed questions per rolling 24h. Safety questions
+  // above are already handled and never reach this gate.
+  const cap = Number(env.DAILY_QUESTION_CAP ?? DEFAULT_DAILY_CAP);
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const count = await env.DB.prepare(
     "SELECT COUNT(*) AS n FROM questions WHERE created_at >= ?",
@@ -92,25 +109,9 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
     });
   }
 
-  const { kb } = await getKb(env.DB);
-
-  // Layer 1: deterministic safety net runs before the model.
-  const intercept = screen(text, kb as Parameters<typeof screen>[1]);
-  if (intercept) {
-    const id = await logQuestion(env.DB, {
-      text,
-      answer: intercept.answer,
-      confidence: intercept.confidence,
-      category: intercept.category,
-      status: intercept.status,
-      needs_human: intercept.needs_human,
-      escalation_reason: intercept.escalation_reason,
-      citations: intercept.citations,
-    });
-    return json({ ...intercept, question_id: id });
-  }
-
   // Layer 2: grounded model answer, returned as a single JSON object.
+  // History roles are clamped to user/assistant so a caller cannot inject a
+  // "system" message through the public endpoint.
   const history = Array.isArray(payload.history) ? payload.history.slice(-6) : [];
   const system = buildSystemPrompt(
     kb as Parameters<typeof buildSystemPrompt>[0],
@@ -119,7 +120,13 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   const messages: ChatMsg[] = [
     { role: "system", content: system },
     ...history
-      .filter((m) => m && typeof m.content === "string" && m.content.trim())
+      .filter(
+        (m) =>
+          m &&
+          (m.role === "user" || m.role === "assistant") &&
+          typeof m.content === "string" &&
+          m.content.trim(),
+      )
       .map((m) => ({ role: m.role, content: m.content }) as ChatMsg),
     { role: "user", content: text },
   ];

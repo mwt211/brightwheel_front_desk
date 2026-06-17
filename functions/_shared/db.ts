@@ -14,8 +14,6 @@ export interface Env {
   OPERATOR_PASSCODE?: string;
 }
 
-export type KbRow = { json: string; version: number; updated_at: string };
-
 export function nowIso(): string {
   return new Date().toISOString();
 }
@@ -32,7 +30,7 @@ export async function getKb(
   const json = JSON.stringify(seed);
   await db
     .prepare(
-      "INSERT INTO kb (id, json, version, updated_at) VALUES (1, ?, 1, ?)",
+      "INSERT OR IGNORE INTO kb (id, json, version, updated_at) VALUES (1, ?, 1, ?)",
     )
     .bind(json, nowIso())
     .run();
@@ -124,12 +122,13 @@ export async function addRequest(
     contact: string;
     message: string;
     related_question_id: number | null;
+    urgent: boolean;
   },
 ): Promise<number> {
   const res = await db
     .prepare(
-      `INSERT INTO requests (created_at, kind, name, contact, message, related_question_id)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO requests (created_at, kind, name, contact, message, related_question_id, urgent)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       nowIso(),
@@ -138,17 +137,19 @@ export async function addRequest(
       input.contact,
       input.message,
       input.related_question_id,
+      input.urgent ? 1 : 0,
     )
     .run();
   return res.meta.last_row_id as number;
 }
 
 export async function listRequests(db: D1Database, limit = 100) {
+  // Urgent items float to the top so a busy operator sees them first.
   const { results } = await db
-    .prepare("SELECT * FROM requests ORDER BY created_at DESC LIMIT ?")
+    .prepare("SELECT * FROM requests ORDER BY urgent DESC, created_at DESC LIMIT ?")
     .bind(limit)
     .all();
-  return results ?? [];
+  return (results ?? []).map((r) => ({ ...r, urgent: Boolean(r.urgent) }));
 }
 
 export async function addHistory(db: D1Database, summary: string) {

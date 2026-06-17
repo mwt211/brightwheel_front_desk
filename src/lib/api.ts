@@ -17,10 +17,18 @@ function opHeaders(): Record<string, string> {
 
 async function jsonOrThrow<T>(res: Response): Promise<T> {
   const data = await res.json().catch(() => ({}));
-  if (!res.ok && !(data as { error?: string }).error) {
-    throw new Error(`Request failed (${res.status})`);
+  if (!res.ok) {
+    throw new Error(
+      (data as { error?: string }).error ?? `Request failed (${res.status})`,
+    );
   }
   return data as T;
+}
+
+// For calls that must inspect a non-2xx body (e.g. a 409 conflict from an
+// optimistic-locked save), return the parsed body without throwing.
+async function jsonBody<T>(res: Response): Promise<T> {
+  return (await res.json().catch(() => ({ error: "Network error" }))) as T;
 }
 
 export async function askQuestion(
@@ -48,7 +56,7 @@ export async function saveKb(
     headers: { "content-type": "application/json", ...opHeaders() },
     body: JSON.stringify({ kb, version }),
   });
-  return jsonOrThrow(res);
+  return jsonBody(res);
 }
 
 export async function leaveRequest(input: {
@@ -106,5 +114,5 @@ export async function teach(input: {
     headers: { "content-type": "application/json", ...opHeaders() },
     body: JSON.stringify(input),
   });
-  return jsonOrThrow(res);
+  return jsonBody(res);
 }

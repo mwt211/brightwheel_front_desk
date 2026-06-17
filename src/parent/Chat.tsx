@@ -407,11 +407,13 @@ function RequestSheet({
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   async function submit() {
     setBusy(true);
+    setFailed(false);
     try {
-      await leaveRequest({
+      const res = await leaveRequest({
         kind,
         name,
         contact,
@@ -420,9 +422,11 @@ function RequestSheet({
           (kind === "tour" ? "Requested a tour." : "Asked for a callback."),
         related_question_id: relatedId ?? null,
       });
-      setSent(true);
+      // Only confirm if the server actually accepted it.
+      if (res && res.ok) setSent(true);
+      else setFailed(true);
     } catch {
-      setSent(true);
+      setFailed(true);
     } finally {
       setBusy(false);
     }
@@ -483,6 +487,12 @@ function RequestSheet({
               rows={3}
               className="w-full bg-white border border-brand-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-400 resize-none"
             />
+            {failed && (
+              <p className="text-xs text-amber">
+                That didn't go through. Please try again
+                {phone ? `, or call ${phone}` : ""}.
+              </p>
+            )}
             <div className="flex gap-2 pt-1">
               <button
                 onClick={onClose}

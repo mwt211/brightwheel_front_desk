@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS requests (
   name                TEXT    NOT NULL DEFAULT '',
   contact             TEXT    NOT NULL DEFAULT '',
   message             TEXT    NOT NULL DEFAULT '',
-  related_question_id INTEGER
+  related_question_id INTEGER,
+  urgent              INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS kb_history (

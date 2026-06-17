@@ -99,6 +99,7 @@ function QuestionsTab() {
 
   return (
     <div className="space-y-3">
+      <ImpactCard items={items} />
       <div className="grid grid-cols-3 gap-2">
         <Stat label="Answered" value={counts.answered} tone="brand" />
         <Stat label="Escalated" value={counts.escalated} tone="amber" />
@@ -325,7 +326,11 @@ function KbTab() {
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-ink">Handbook (source of truth)</h2>
         <button
-          onClick={() => setRaw((r) => !r)}
+          onClick={() => {
+            // Sync the raw editor to the latest structured edits before showing it.
+            if (!raw && kb) setRawText(JSON.stringify(kb, null, 2));
+            setRaw((r) => !r);
+          }}
           className="text-xs text-brand-700 underline"
         >
           {raw ? "Structured editor" : "Advanced (raw JSON)"}
@@ -436,10 +441,22 @@ function InboxTab() {
   return (
     <div className="space-y-2">
       {items.map((r) => (
-        <div key={r.id} className="bg-white border border-brand-100 rounded-xl p-3">
+        <div
+          key={r.id}
+          className={`bg-white border rounded-xl p-3 ${
+            r.urgent ? "border-amber/50 ring-1 ring-amber/30" : "border-brand-100"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium capitalize bg-brand-50 text-brand-700 rounded-full px-2 py-0.5">
-              {r.kind}
+            <span className="flex items-center gap-1.5">
+              <span className="text-xs font-medium capitalize bg-brand-50 text-brand-700 rounded-full px-2 py-0.5">
+                {r.kind}
+              </span>
+              {r.urgent && (
+                <span className="text-[11px] font-medium bg-amber/15 text-amber border border-amber/30 rounded-full px-2 py-0.5">
+                  Urgent
+                </span>
+              )}
             </span>
             <span className="text-[11px] text-ink/40">
               {new Date(r.created_at).toLocaleString()}
@@ -482,6 +499,76 @@ function ActivityTab() {
 }
 
 // ---------- Shared bits ----------
+
+const CATEGORY_LABELS: Record<string, string> = {
+  hours_calendar: "Hours & closures",
+  tuition_fees: "Tuition & fees",
+  illness_health: "Illness & health",
+  food_menu: "Meals & lunch",
+  tours_enrollment: "Tours & enrollment",
+  pickup_dropoff: "Pickup & dropoff",
+  other: "Other",
+};
+
+// Assume each question the bot answers without staff saves a short call/text.
+const MINUTES_PER_DEFLECTION = 3;
+
+function ImpactCard({ items }: { items: QuestionLogEntry[] }) {
+  const total = items.length;
+  const answered = items.filter((q) => q.status === "answered").length;
+  const handled = items.filter((q) => q.status !== "unanswered").length;
+  const rate = total ? Math.round((answered / total) * 100) : 0;
+  const minutes = answered * MINUTES_PER_DEFLECTION;
+  const saved =
+    minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`;
+
+  const topics = Object.entries(
+    items.reduce<Record<string, number>>((acc, q) => {
+      acc[q.category] = (acc[q.category] ?? 0) + 1;
+      return acc;
+    }, {}),
+  )
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+
+  return (
+    <div className="bg-brand-700 text-white rounded-2xl p-4">
+      <p className="text-[11px] uppercase tracking-wide text-brand-100">
+        Less admin. More impact.
+      </p>
+      <div className="mt-2 grid grid-cols-3 gap-3">
+        <div>
+          <div className="text-2xl font-semibold">{saved}</div>
+          <div className="text-[11px] text-brand-100">staff time saved</div>
+        </div>
+        <div>
+          <div className="text-2xl font-semibold">{rate}%</div>
+          <div className="text-[11px] text-brand-100">answered instantly</div>
+        </div>
+        <div>
+          <div className="text-2xl font-semibold">{handled}</div>
+          <div className="text-[11px] text-brand-100">of {total} handled</div>
+        </div>
+      </div>
+      {topics.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {topics.map(([cat, n]) => (
+            <span
+              key={cat}
+              className="text-[11px] bg-brand-600 rounded-full px-2 py-0.5"
+            >
+              {CATEGORY_LABELS[cat] ?? cat} &middot; {n}
+            </span>
+          ))}
+        </div>
+      )}
+      <p className="mt-2 text-[10px] text-brand-100/80">
+        Estimated from this center's log, about {MINUTES_PER_DEFLECTION} minutes saved
+        per question answered without staff.
+      </p>
+    </div>
+  );
+}
 
 function Stat({
   label,

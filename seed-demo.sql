@@ -5,8 +5,20 @@
 
 DELETE FROM kb;
 DELETE FROM questions;
-DELETE FROM requests;
 DELETE FROM kb_history;
+
+-- Recreate requests so the urgent column exists regardless of prior schema.
+DROP TABLE IF EXISTS requests;
+CREATE TABLE requests (
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at          TEXT    NOT NULL,
+  kind                TEXT    NOT NULL,
+  name                TEXT    NOT NULL DEFAULT '',
+  contact             TEXT    NOT NULL DEFAULT '',
+  message             TEXT    NOT NULL DEFAULT '',
+  related_question_id INTEGER,
+  urgent              INTEGER NOT NULL DEFAULT 0
+);
 
 INSERT INTO questions (created_at, text, answer, confidence, category, status, needs_human, escalation_reason, citations) VALUES
 (datetime('now','-3 hours'), 'What are your hours?', 'We are open Monday through Friday, 7:00 AM to 6:00 PM.', 'high', 'hours_calendar', 'answered', 0, NULL, '[]'),
@@ -22,9 +34,10 @@ INSERT INTO questions (created_at, text, answer, confidence, category, status, n
 (datetime('now','-14 minutes'), 'Is there a summer camp program for older kids?', 'I do not have details about a summer camp on file. Let me pass this along.', 'low', 'tours_enrollment', 'unanswered', 1, NULL, '[]'),
 (datetime('now','-6 minutes'), 'Can I watch my child on a live webcam during the day?', 'I do not have that on file and will pass it to the team.', 'low', 'other', 'unanswered', 1, NULL, '[]');
 
-INSERT INTO requests (created_at, kind, name, contact, message, related_question_id) VALUES
-(datetime('now','-80 minutes'), 'tour', 'Jordan Rivera', 'jordan.r@example.com', 'Interested in a tour for our 2 year old. Thursday afternoon if possible.', NULL),
-(datetime('now','-33 minutes'), 'message', 'Sam Lee', '(505) 555-0190', 'Could someone call me about the infant waitlist? Thank you.', NULL);
+INSERT INTO requests (created_at, kind, name, contact, message, related_question_id, urgent) VALUES
+(datetime('now','-80 minutes'), 'tour', 'Jordan Rivera', 'jordan.r@example.com', 'Interested in a tour for our 2 year old. Thursday afternoon if possible.', NULL, 0),
+(datetime('now','-33 minutes'), 'message', 'Sam Lee', '(505) 555-0190', 'Could someone call me about the infant waitlist? Thank you.', NULL, 0),
+(datetime('now','-12 minutes'), 'message', 'Priya Nadkarni', '(505) 555-0177', 'My daughter spiked a fever this morning and I need to pick her up as soon as possible.', NULL, 1);
 
 INSERT INTO kb_history (created_at, summary) VALUES
 (datetime('now','-1 day'), 'Operator reviewed and published the parent handbook.');

@@ -134,6 +134,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ env, request }) => {
 
   const { kb, version } = await getKb(env.DB);
   const typed = kb as { sections: { title: string; body: string }[] };
+  // Guard against a handbook saved without a sections array (e.g. via the raw
+  // JSON editor) so a teach never throws.
+  if (!Array.isArray(typed.sections)) typed.sections = [];
   // Replace an existing section with the same title, else append.
   const idx = typed.sections.findIndex(
     (s) => s.title.toLowerCase() === title.toLowerCase(),
