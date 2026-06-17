@@ -40,6 +40,8 @@ export type AnswerPayload = {
   safety_intercept?: boolean;
   /** Server-assigned id of the logged question, for follow-up actions. */
   question_id?: number;
+  /** True when answered on-device from the cached handbook (no network). */
+  offline?: boolean;
 };
 
 export type ChatMessage =

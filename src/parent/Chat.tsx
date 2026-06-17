@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import type { AnswerPayload, ChatMessage, SuggestedAction } from "../lib/types";
+import type { AnswerPayload, CenterKB, ChatMessage, SuggestedAction } from "../lib/types";
 import { askQuestion, fetchKb, leaveRequest } from "../lib/api";
 import { createRecognizer, isVoiceInputSupported, type Recognizer } from "./voice";
+import {
+  answerOffline,
+  cacheKb,
+  loadCachedKb,
+  flushQueue,
+  queueRequest,
+} from "./offline";
 import {
   STRINGS,
   STARTERS,
@@ -35,24 +42,52 @@ export function Chat() {
   // One language for the whole parent surface: auto-detected from each message,
   // also manually toggleable. Drives the UI strings and voice recognition.
   const [lang, setLang] = useState<Lang>(initialLang);
+  const [online, setOnline] = useState(
+    () => typeof navigator === "undefined" || navigator.onLine,
+  );
   const [requestModal, setRequestModal] = useState<{
     kind: "tour" | "message";
     relatedId?: number;
   } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognizerRef = useRef<Recognizer | null>(null);
+  const kbRef = useRef<CenterKB | null>(null); // full handbook, kept for offline answers
   const t = STRINGS[lang];
 
   useEffect(() => {
+    function applyKb(kb: CenterKB) {
+      kbRef.current = kb;
+      setCenter({
+        name: kb.center.name,
+        tagline: kb.center.tagline,
+        phone: kb.center.phone,
+      });
+    }
     fetchKb()
-      .then(({ kb }) =>
-        setCenter({
-          name: kb.center.name,
-          tagline: kb.center.tagline,
-          phone: kb.center.phone,
-        }),
-      )
-      .catch(() => setCenter(null));
+      .then(({ kb }) => {
+        applyKb(kb);
+        cacheKb(kb); // save for offline use on future visits
+      })
+      .catch(() => {
+        const cached = loadCachedKb(); // first load offline: use the saved copy
+        if (cached) applyKb(cached);
+        else setCenter(null);
+      });
+  }, []);
+
+  // Track connectivity; flush any queued tour/message requests on reconnect.
+  useEffect(() => {
+    const goOnline = () => {
+      setOnline(true);
+      flushQueue();
+    };
+    const goOffline = () => setOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
   }, []);
 
   useEffect(() => {
@@ -74,7 +109,20 @@ export function Chat() {
     setInput("");
     setLoading(true);
     try {
-      const payload = await askQuestion(trimmed, history);
+      let payload: AnswerPayload;
+      const offline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (offline && kbRef.current) {
+        // No connection: answer on-device from the cached handbook.
+        payload = answerOffline(kbRef.current, trimmed, msgLang);
+      } else {
+        try {
+          payload = await askQuestion(trimmed, history);
+        } catch (err) {
+          // Lost the network mid-request: fall back to the offline answer.
+          if (kbRef.current) payload = answerOffline(kbRef.current, trimmed, msgLang);
+          else throw err;
+        }
+      }
       setMessages((prev) => [
         ...prev,
         { id: uid(), role: "assistant", text: payload.answer, payload },
@@ -163,6 +211,12 @@ export function Chat() {
           </div>
         </div>
       </header>
+
+      {!online && (
+        <div className="bg-amber/15 text-amber text-[11px] text-center py-1 border-b border-amber/30">
+          {t.offlineBanner}
+        </div>
+      )}
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
         {messages.length === 0 && (
@@ -283,6 +337,12 @@ function AssistantBubble({
         </div>
 
         {payload && <TrustRow lang={lang} payload={payload} />}
+
+        {payload?.offline && (
+          <span className="inline-block text-[10px] bg-ink/10 text-ink/60 rounded-full px-2 py-0.5">
+            {s.offlineTag}
+          </span>
+        )}
 
         {payload?.citations && payload.citations.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
@@ -461,22 +521,35 @@ function RequestSheet({
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [queued, setQueued] = useState(false);
 
   async function submit() {
     setBusy(true);
     setFailed(false);
+    const payload = {
+      kind,
+      name,
+      contact,
+      message: message || (kind === "tour" ? s.reqDefaultTour : s.reqDefaultMsg),
+      related_question_id: relatedId ?? null,
+    };
+    // Offline: save it now and send automatically on reconnect.
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      queueRequest(payload);
+      setQueued(true);
+      setSent(true);
+      setBusy(false);
+      return;
+    }
     try {
-      const res = await leaveRequest({
-        kind,
-        name,
-        contact,
-        message: message || (kind === "tour" ? s.reqDefaultTour : s.reqDefaultMsg),
-        related_question_id: relatedId ?? null,
-      });
+      const res = await leaveRequest(payload);
       if (res && res.ok) setSent(true);
       else setFailed(true);
     } catch {
-      setFailed(true);
+      // Network dropped mid-send: queue it rather than lose it.
+      queueRequest(payload);
+      setQueued(true);
+      setSent(true);
     } finally {
       setBusy(false);
     }
@@ -494,7 +567,9 @@ function RequestSheet({
         {sent ? (
           <div className="text-center py-4 space-y-2">
             <p className="font-semibold text-brand-700">{s.thankYou}</p>
-            <p className="text-sm text-ink/70">{s.thankBody(kind, phone)}</p>
+            <p className="text-sm text-ink/70">
+              {queued ? s.queuedBody(kind) : s.thankBody(kind, phone)}
+            </p>
             <button
               onClick={onClose}
               className="mt-2 text-sm bg-brand-600 text-white rounded-full px-4 py-2"
