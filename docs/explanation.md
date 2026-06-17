@@ -16,7 +16,8 @@ Administrators lose hours every day answering the same questions: hours and clos
 2. Ask in Spanish ("cuanto cuesta para bebes?"). It answers in Spanish.
 3. Ask "My child has a fever, can they come in?" It never gives medical advice; a safety net shares the policy and routes to a person.
 4. Ask something off-book ("Do you have a swimming pool?"). It says it doesn't have that on file and offers a human, instead of guessing.
-5. Open `/operator`: see the **Impact** view (time saved, answer rate), the **urgent-first inbox**, **Gap Radar** (turn that swimming-pool gap into a handbook entry in one tap), and **Import from a photo** (upload the sample handbook page in `docs/sample-handbook.png` and watch new sections get drafted).
+5. Use the **Viewing as** selector to view as a parent, then ask "Did Mateo nap today?" or "What is my balance?" The answer comes from that child's record, cited as "Mateo's day." (Fictional demo data.)
+6. Open `/operator`: see the **Impact** view (time saved, answer rate), the **urgent-first inbox**, **Gap Radar** (turn that swimming-pool gap into a handbook entry in one tap), and **Import from a photo** (upload the sample handbook page in `docs/sample-handbook.png` and watch new sections get drafted).
 
 ## How it earns trust
 
@@ -29,6 +30,7 @@ In childcare a confident wrong answer is worse than no answer, so this is the sp
 ## What makes it more than a chatbot
 
 - **It teaches itself.** Gap Radar collects the questions the bot could not answer, drafts a handbook entry for each, and the operator approves in one tap. Coverage compounds. Health topics are held back for manual review.
+- **It knows your child's day.** A parent can view as their family and ask "did she nap?", "what did he eat?", or "what's my balance?" The answer comes from that child's record, cited and held to the same safety net, which shows the front desk belongs inside brightwheel's product, not beside it. Demo data is fictional; real access is per-parent and authenticated.
 - **It onboards a center in minutes.** Snap a photo of a paper handbook and a vision model drafts editable sections.
 - **It shows its value.** The operator opens to estimated hours saved and answer rate, the metric a busy owner actually cares about.
 - **It works on the go.** Installable to the home screen, and with no signal it still answers from the cached handbook (the safety net runs offline too) and queues messages until reconnect.

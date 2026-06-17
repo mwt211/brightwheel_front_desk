@@ -44,10 +44,14 @@ export async function askWithFallback(
   history: { role: "user" | "assistant"; content: string }[],
   kb: CenterKB | null,
   lang: Lang,
+  childId?: string | null,
 ): Promise<AnswerPayload> {
+  // Personal, per-child answers come from connected data that is not cached
+  // on-device, so they require a connection; the handbook fallback below covers
+  // general questions offline.
   if (isOffline() && kb) return answerOffline(kb, text, lang);
   try {
-    return await askQuestion(text, history);
+    return await askQuestion(text, history, childId);
   } catch (err) {
     if (kb) return answerOffline(kb, text, lang);
     throw err;

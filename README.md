@@ -2,6 +2,8 @@
 
 An out-of-the-box **AI Front Desk** for early-education centers, built for the brightwheel take-home. A parent asks a question in plain language, by text or voice, in English or Spanish, and gets a fast, center-specific answer they can trust. An operator owns the source of truth, sees what families are asking and where the bot struggled, and improves the system in one tap, including by snapping a photo of their paper handbook.
 
+![A parent asks about hours, the illness policy, their child's day, and in Spanish; every answer is grounded and cited.](docs/demo.gif)
+
 **Live demo**
 - Parent front desk: https://brightwheel-front-desk.pages.dev
 - Operator control center: https://brightwheel-front-desk.pages.dev/operator
@@ -36,7 +38,8 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 **Parent chat**
 - Mobile-first, text or voice input.
 - Multilingual: detects and answers in the parent's language (Spanish supported today).
-- Every answer shows its handbook source and a confidence signal.
+- Every answer shows the cited handbook text and a confidence signal.
+- **Answers about your child's day:** view as a parent and ask about naps, meals, check-in, or your account; the answer comes from that family's record, cited as "[child]'s day". Demo data is fictional; real access is per-parent and authenticated.
 - Sensitive or uncovered questions show an escalation card and a one-tap path to a human; tour and message requests are captured.
 - **Works offline (installable PWA):** loads instantly, answers common questions from the cached handbook with no signal (the safety net still runs), and queues tour/message requests until reconnect.
 

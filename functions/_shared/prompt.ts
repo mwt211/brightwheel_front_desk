@@ -1,6 +1,9 @@
 // Builds the grounding system prompt from the knowledge base. The entire
 // handbook is small, so we inject all of it (no retrieval needed at this size)
-// and instruct the model to answer ONLY from it.
+// and instruct the model to answer ONLY from it. When a parent is viewing as a
+// specific child, that family's private daily record is injected too, with the
+// same answer-only-from-source discipline.
+import { childContext, type ChildRecord } from "./children";
 
 type Kb = {
   center: {
@@ -28,7 +31,7 @@ const DOW = [
   "Saturday",
 ];
 
-export function buildSystemPrompt(kb: Kb, now: Date): string {
+export function buildSystemPrompt(kb: Kb, now: Date, child?: ChildRecord | null): string {
   const dayName = DOW[now.getUTCDay()];
   const dateStr = now.toISOString().slice(0, 10);
   const todaysLunch = kb.lunchMenu[dayName] ?? "No lunch is served on weekends.";
@@ -49,6 +52,13 @@ export function buildSystemPrompt(kb: Kb, now: Date): string {
     .map((f) => `- Q: ${f.question}\n  A: ${f.answer}`)
     .join("\n");
 
+  const familyBlock = child
+    ? `\n\n== TODAY'S RECORD FOR THIS FAMILY (private, only for this parent) ==\n${childContext(child)}`
+    : "";
+  const familyRule = child
+    ? `\n10. CONNECTED FAMILY RECORD: For questions about ${child.firstName} specifically (check-in or check-out, naps, meals, activities, mood, photos) or the family account (balance, next payment, autopay), answer ONLY from the family record above. Cite it with the section "${child.firstName}'s day" and a short supporting quote, and use confidence "high" when the record answers it directly. If the record does not contain the answer, say you do not have that detail on file and offer to connect them with staff. Never interpret ${child.firstName}'s health or give medical advice from this data; medical concerns still go to staff or a pediatrician.`
+    : "";
+
   return `You are the front desk assistant for ${kb.center.name}, a childcare center in ${kb.center.city}. You answer questions from parents and prospective families. You serve children ${kb.center.ages}. Hours: ${kb.center.hours}.
 
 TODAY is ${dayName}, ${dateStr}. Today's lunch is: ${todaysLunch}
@@ -65,7 +75,7 @@ ${menu}
 ${calendar}
 
 == FREQUENTLY ASKED QUESTIONS ==
-${faqs}
+${faqs}${familyBlock}
 
 == RULES ==
 1. Answer ONLY from the handbook, menu, calendar, and FAQs above. Never invent tuition amounts, dates, names, or policies.
@@ -76,7 +86,7 @@ ${faqs}
 6. For "what is lunch today" use TODAY's lunch above. For other days use the weekly menu.
 7. Offer a helpful suggested_action when relevant: "schedule_tour" for tour or visit interest, "message_front_desk" to leave a message for staff, "call" with the phone number for anything urgent or sensitive. Use "none" sparingly.
 8. Keep answers to a few sentences.
-9. Reply in the same language the parent used. If they write in Spanish, answer warmly in Spanish; if English, answer in English. Keep each citation's "section" exactly as the handbook titles it (in English) so it stays linkable.
+9. Reply in the same language the parent used. If they write in Spanish, answer warmly in Spanish; if English, answer in English. Keep each citation's "section" exactly as the handbook titles it (in English), or as the family record section described below, so it stays linkable.${familyRule}
 
 == OUTPUT FORMAT ==
 Respond with ONLY a single JSON object, no prose before or after, no code fences. It must match exactly:

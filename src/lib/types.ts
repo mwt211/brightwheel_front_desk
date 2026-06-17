@@ -48,6 +48,10 @@ export type ChatMessage =
   | { id: string; role: "user"; text: string }
   | { id: string; role: "assistant"; text: string; payload?: AnswerPayload };
 
+/** A child a parent can "view as" in the demo (identity only; the private
+ * daily record stays server-side and is injected only into the answer). */
+export type Child = { id: string; name: string; firstName: string; room: string };
+
 // ---- Knowledge base ----
 
 export type FaqEntry = {

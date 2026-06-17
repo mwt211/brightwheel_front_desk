@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import type { AnswerPayload, CenterKB, ChatMessage, SuggestedAction } from "../lib/types";
-import { fetchKb, leaveRequest } from "../lib/api";
+import type { AnswerPayload, CenterKB, Child, ChatMessage, SuggestedAction } from "../lib/types";
+import { fetchKb, fetchChildren, leaveRequest } from "../lib/api";
 import { createRecognizer, isVoiceInputSupported, type Recognizer } from "./voice";
 import {
   askWithFallback,
@@ -13,6 +13,7 @@ import {
 import {
   STRINGS,
   STARTERS,
+  childStarters,
   detectLang,
   initialLang,
   speechLang,
@@ -50,6 +51,9 @@ export function Chat() {
     kind: "tour" | "message";
     relatedId?: number;
   } | null>(null);
+  // Optional "viewing as" context: a parent can ask about their child's day.
+  const [children, setChildren] = useState<Child[]>([]);
+  const [childId, setChildId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognizerRef = useRef<Recognizer | null>(null);
   const kbRef = useRef<CenterKB | null>(null); // full handbook, kept for offline answers
@@ -74,6 +78,12 @@ export function Chat() {
         if (cached) applyKb(cached);
         else setCenter(null);
       });
+  }, []);
+
+  useEffect(() => {
+    fetchChildren()
+      .then(setChildren)
+      .catch(() => setChildren([]));
   }, []);
 
   // Track connectivity; flush any queued tour/message requests on reconnect.
@@ -111,7 +121,7 @@ export function Chat() {
     setLoading(true);
     try {
       // Online, with an automatic on-device fallback when there's no network.
-      const payload = await askWithFallback(trimmed, history, kbRef.current, msgLang);
+      const payload = await askWithFallback(trimmed, history, kbRef.current, msgLang, childId);
       setMessages((prev) => [
         ...prev,
         { id: uid(), role: "assistant", text: payload.answer, payload },
@@ -160,6 +170,15 @@ export function Chat() {
     setInput("");
     setRequestModal(null);
   }
+
+  // Switching who you are viewing as changes the grounding context, so clear
+  // the thread to avoid mixing one family's answers with another's.
+  function pickChild(id: string | null) {
+    setChildId(id);
+    reset();
+  }
+
+  const selectedChild = children.find((c) => c.id === childId) ?? null;
 
   return (
     <div className="flex flex-col h-full max-w-md mx-auto bg-cream">
@@ -210,9 +229,42 @@ export function Chat() {
         </div>
       )}
 
+      {children.length > 0 && (
+        <div className="bg-brand-50 border-b border-brand-100 px-3 py-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px]">
+          <label htmlFor="viewas" className="text-ink/60">
+            {t.viewingAs}
+          </label>
+          <select
+            id="viewas"
+            value={childId ?? ""}
+            onChange={(e) => pickChild(e.target.value || null)}
+            className="bg-white border border-brand-200 rounded-full px-2 py-0.5 text-brand-700 outline-none focus:border-brand-400"
+          >
+            <option value="">{t.generalFrontDesk}</option>
+            {children.map((c) => (
+              <option key={c.id} value={c.id}>
+                {t.parentOf(c.name)}
+              </option>
+            ))}
+          </select>
+          {selectedChild && <span className="text-ink/45">{t.childDemoNote}</span>}
+        </div>
+      )}
+
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
         {messages.length === 0 && (
-          <Welcome lang={lang} tagline={center?.tagline} onPick={send} />
+          <Welcome
+            greeting={
+              selectedChild
+                ? t.parentOf(selectedChild.name)
+                : lang === "en"
+                  ? (center?.tagline ?? t.taglineFallback)
+                  : t.taglineFallback
+            }
+            hint={selectedChild ? t.childWelcomeHint : t.welcomeHint}
+            starters={selectedChild ? childStarters(lang, selectedChild.firstName) : STARTERS[lang]}
+            onPick={send}
+          />
         )}
         {messages.map((m) =>
           m.role === "user" ? (
@@ -266,25 +318,25 @@ export function Chat() {
 }
 
 function Welcome({
-  lang,
-  tagline,
+  greeting,
+  hint,
+  starters,
   onPick,
 }: {
-  lang: Lang;
-  tagline?: string;
+  greeting: string;
+  hint: string;
+  starters: string[];
   onPick: (q: string) => void;
 }) {
-  const s = STRINGS[lang];
-  const greeting = lang === "en" ? (tagline ?? s.taglineFallback) : s.taglineFallback;
   return (
     <div className="text-center pt-6">
       <div className="mx-auto w-12 h-12 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-display text-xl">
         CS
       </div>
       <p className="mt-3 text-sm text-ink/70 px-6">{greeting}</p>
-      <p className="mt-1 text-xs text-ink/50">{s.welcomeHint}</p>
+      <p className="mt-1 text-xs text-ink/50">{hint}</p>
       <div className="mt-5 flex flex-col gap-2 px-2">
-        {STARTERS[lang].map((q) => (
+        {starters.map((q) => (
           <button
             key={q}
             onClick={() => onPick(q)}
@@ -384,10 +436,16 @@ function AssistantBubble({
 
 function TrustRow({ lang, payload }: { lang: Lang; payload: AnswerPayload }) {
   const dot = { high: "bg-brand-500", medium: "bg-amber", low: "bg-ink/30" } as const;
+  // Personal answers cite the family record ("Mateo's day"), so the trust line
+  // names that source instead of the handbook.
+  const fromRecord = payload.citations?.some((c) => /'s day$/.test(c.section));
+  const label = fromRecord
+    ? STRINGS[lang].fromRecord
+    : STRINGS[lang].trust[payload.confidence];
   return (
     <div className="flex items-center gap-1.5 text-[11px] text-ink/55 pl-1">
       <span className={`inline-block w-1.5 h-1.5 rounded-full ${dot[payload.confidence]}`} />
-      {STRINGS[lang].trust[payload.confidence]}
+      {label}
     </div>
   );
 }

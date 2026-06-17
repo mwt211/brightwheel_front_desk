@@ -26,8 +26,12 @@ that underpins both. For how they fit together see
 - **Why:** A large share of childcare families speak Spanish. Equitable access is core to brightwheel's mission, and a parent should never have to translate their own question or read a half-translated page.
 
 ### Grounded, cited answers
-- **What:** Every answer is drawn only from the center's handbook and shows the source section as a chip ("Source: Tuition & Fees").
+- **What:** Every answer is drawn only from the center's handbook and shows the cited handbook text with its source section ("Source: Tuition & Fees"), so the parent sees the actual passage, not just a label.
 - **Why:** Trust. The parent can see where the answer came from, and the system cannot invent tuition figures, dates, or policies it was never given.
+
+### Answers about your child's day (connected data)
+- **What:** A parent can switch the "Viewing as" selector to their family and ask about their child's day (naps, meals, check-in or check-out, activities, mood, photos) or their account (balance, next payment, autopay). The answer is grounded only in that family's record, cited as "[child]'s day," and the trust line reads "From your child's record." The deterministic safety net still runs first, so a health question about the child escalates and is never answered from the record. Demo data is fictional; in production this is per-parent authenticated data from the daily report and billing systems.
+- **Why:** A front desk for childcare is more than a policy FAQ. The questions parents ask most ("did she nap?", "what did he eat?", "what do I owe?") are about their own child. Answering those, with the same grounding, citation, and safety discipline, shows the assistant belongs inside brightwheel's product, not beside it.
 
 ### Confidence signal
 - **What:** A small colored dot and label mark each answer as high, medium, or low confidence ("From our handbook" / "Partly covered; please confirm" / "Not in our handbook").

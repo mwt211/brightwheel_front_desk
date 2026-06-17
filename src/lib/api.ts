@@ -1,6 +1,7 @@
 import type {
   AnswerPayload,
   CenterKB,
+  Child,
   GapCluster,
   QuestionLogEntry,
   RequestEntry,
@@ -34,13 +35,21 @@ async function jsonBody<T>(res: Response): Promise<T> {
 export async function askQuestion(
   text: string,
   history: { role: "user" | "assistant"; content: string }[],
+  childId?: string | null,
 ): Promise<AnswerPayload> {
   const res = await fetch("/api/ask", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ text, history }),
+    body: JSON.stringify({ text, history, childId: childId ?? undefined }),
   });
   return jsonOrThrow<AnswerPayload>(res);
+}
+
+export async function fetchChildren(): Promise<Child[]> {
+  const data = await jsonOrThrow<{ children: Child[] }>(
+    await fetch("/api/children"),
+  );
+  return data.children ?? [];
 }
 
 export async function fetchKb(): Promise<{ kb: CenterKB; version: number }> {

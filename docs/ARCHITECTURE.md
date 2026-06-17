@@ -63,10 +63,13 @@ design:
    a public endpoint. Safety questions never reach this gate.
 5. **Ground and answer** (`_shared/prompt.ts` + `_shared/llm.ts`). The full
    handbook, today's date, the weekly menu, and the answer-only-from-this rules
-   go into the system prompt. History roles are clamped to user/assistant so the
-   public endpoint cannot be used to inject a system prompt. The model returns
-   one JSON object: answer, citations, confidence, category, needs_human,
-   escalation_reason, suggested_actions.
+   go into the system prompt. If the request carries a `childId`, that family's
+   private daily record (`_shared/children.ts`) is injected too, under the same
+   answer-only discipline, and personal answers are cited as `"<firstName>'s
+   day"`. History roles are clamped to user/assistant so the public endpoint
+   cannot be used to inject a system prompt. The model returns one JSON object:
+   answer, citations, confidence, category, needs_human, escalation_reason,
+   suggested_actions.
 6. **Normalize and log.** The result is normalized defensively; if the model
    returns nothing usable, the system fails safe to a human handoff. The
    question, answer, confidence, category, and status are written to the log.
@@ -112,6 +115,19 @@ data URLs and posts them. `runVisionJson` sends them to Groq's multimodal model
 which transcribes and structures the pages into `{ sections: [{title, body}] }`
 using only the visible text. The endpoint validates types and total size,
 requires the `sections` key when parsing, and returns the sections for review.
+
+## Connected family answers
+
+`GET /api/children` lists the demo families (identity only). When a parent views
+as one, the chat sends `childId` to `/api/ask`, and `_shared/children.ts` injects
+that family's daily record and account into the prompt as a second grounded
+source, cited as `"<firstName>'s day"` with the trust line "From your child's
+record." The same answer-only-from-source rule applies, so the model states only
+what the record contains, and the deterministic safety net still runs first, so a
+medical question about the child escalates rather than reading the record. The
+record is a static fictional seed (`seed/children.json`); in production this is
+per-parent authenticated data from the daily-report and billing systems, which is
+why the list endpoint exposes no record or account fields.
 The client merges them non-destructively into the handbook editor (always
 appended; a colliding title is suffixed, never overwritten), and the operator
 reviews and Saves. The output is always operator-reviewed before it grounds any

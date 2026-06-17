@@ -13,9 +13,14 @@ Ask the front desk a question.
 Request:
 ```json
 { "text": "Are you open on Veterans Day?",
-  "history": [{ "role": "user", "content": "..." }] }
+  "history": [{ "role": "user", "content": "..." }],
+  "childId": "mateo" }
 ```
 `history` is optional (last 6 turns used; roles other than user/assistant are dropped).
+`childId` is optional; when set to a known child it injects that family's private
+daily record into the grounding, so personal questions ("did Mateo nap today?")
+are answered from it and cited as `"<firstName>'s day"`. The safety net still runs
+first regardless, so a medical question escalates and never reads the record.
 
 Response (the structured answer plus server fields):
 ```json
@@ -34,6 +39,17 @@ Response (the structured answer plus server fields):
 ```
 `safety_intercept` is present only when the deterministic safety net handled the
 question. `status` is `answered | escalated | unanswered`.
+
+## GET /api/children  (public)
+
+The identities a parent can view as in the demo, for the "Viewing as" selector.
+```json
+{ "children": [ { "id": "mateo", "name": "Mateo Reyes", "firstName": "Mateo", "room": "Toddler Room (Sunflowers)" } ] }
+```
+Identity only. The private daily record and account are never listed here; they
+are injected server-side into the answer for the selected `childId` (see
+`/api/ask`). Fictional demo data; production access would be per-parent and
+authenticated.
 
 ## GET /api/kb  (public) · PUT /api/kb  (operator)
 

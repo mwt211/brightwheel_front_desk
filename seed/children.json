@@ -1,0 +1,56 @@
+{
+  "_note": "Fictional demo children for the connected-answers feature. No real data. In production this is per-parent authenticated data from the daily report and billing systems; here it is a static seed for demonstration only.",
+  "children": [
+    {
+      "id": "mateo",
+      "name": "Mateo Reyes",
+      "firstName": "Mateo",
+      "room": "Toddler Room (Sunflowers)",
+      "today": {
+        "checkIn": "8:05 AM",
+        "checkOut": null,
+        "naps": [{ "start": "12:40 PM", "end": "2:15 PM" }],
+        "meals": [
+          { "meal": "Morning snack", "detail": "banana slices and oat rounds, ate most" },
+          { "meal": "Lunch", "detail": "ate all of today's hot lunch and asked for seconds" },
+          { "meal": "Afternoon snack", "detail": "cheese cubes and cucumber" }
+        ],
+        "activities": "Sensory bins, outdoor play on the patio, and a group reading of Brown Bear, Brown Bear.",
+        "mood": "Happy and energetic; gave hugs at drop-off and settled in quickly.",
+        "diapering": "Three diaper changes, all routine.",
+        "photosShared": 2
+      },
+      "account": {
+        "balance": "$0.00",
+        "nextPaymentAmount": "$1,215.00",
+        "nextPaymentDue": "the 1st of next month",
+        "autopay": "on"
+      }
+    },
+    {
+      "id": "ava",
+      "name": "Ava Lin",
+      "firstName": "Ava",
+      "room": "Preschool Room (Redwoods)",
+      "today": {
+        "checkIn": "8:50 AM",
+        "checkOut": null,
+        "naps": [{ "start": "1:00 PM", "end": "2:00 PM" }],
+        "meals": [
+          { "meal": "Morning snack", "detail": "apple slices and crackers" },
+          { "meal": "Lunch", "detail": "ate most of today's lunch and loved the fruit" }
+        ],
+        "activities": "Art easel, dramatic play in the kitchen center, and letter tracing.",
+        "mood": "Cheerful and chatty; led circle time today.",
+        "diapering": "Independent in the bathroom, no accidents.",
+        "photosShared": 4
+      },
+      "account": {
+        "balance": "$48.00 in late pick-up fees from last week",
+        "nextPaymentAmount": "$995.00",
+        "nextPaymentDue": "the 1st of next month",
+        "autopay": "off"
+      }
+    }
+  ]
+}

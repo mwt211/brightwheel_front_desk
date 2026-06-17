@@ -173,7 +173,8 @@ Administrators lose hours every day answering the same questions: hours and clos
 2. Ask in Spanish ("cuanto cuesta para bebes?"). It answers in Spanish.
 3. Ask "My child has a fever, can they come in?" It never gives medical advice; a safety net shares the policy and routes to a person.
 4. Ask something off-book ("Do you have a swimming pool?"). It says it doesn't have that on file and offers a human, instead of guessing.
-5. Open `/operator`: see the **Impact** view (time saved, answer rate), the **urgent-first inbox**, **Gap Radar** (turn that swimming-pool gap into a handbook entry in one tap), and **Import from a photo** (upload the sample handbook page in `docs/sample-handbook.png` and watch new sections get drafted).
+5. Use the **Viewing as** selector to view as a parent, then ask "Did Mateo nap today?" or "What is my balance?" The answer comes from that child's record, cited as "Mateo's day." (Fictional demo data.)
+6. Open `/operator`: see the **Impact** view (time saved, answer rate), the **urgent-first inbox**, **Gap Radar** (turn that swimming-pool gap into a handbook entry in one tap), and **Import from a photo** (upload the sample handbook page in `docs/sample-handbook.png` and watch new sections get drafted).
 
 ## How it earns trust
 
@@ -238,6 +239,10 @@ that underpins both. For how they fit together see
 ### Grounded, cited answers
 - **What:** Every answer is drawn only from the center's handbook and shows the cited handbook text with its source section ("Source: Tuition & Fees").
 - **Why:** Trust. The parent can see where the answer came from, and the system cannot invent tuition figures, dates, or policies it was never given.
+
+### Answers about your child's day (connected data)
+- **What:** A parent can switch the "Viewing as" selector to their family and ask about their child's day (naps, meals, check-in or check-out, activities, mood, photos) or their account (balance, next payment, autopay). The answer is grounded only in that family's record, cited as "[child]'s day," and the trust line reads "From your child's record." The deterministic safety net still runs first, so a health question about the child escalates and is never answered from the record. Demo data is fictional; in production this is per-parent authenticated data from the daily report and billing systems.
+- **Why:** A front desk for childcare is more than a policy FAQ. The questions parents ask most ("did she nap?", "what did he eat?", "what do I owe?") are about their own child. Answering those, with the same grounding, citation, and safety discipline, shows the assistant belongs inside brightwheel's product, not beside it.
 
 ### Confidence signal
 - **What:** A small colored dot and label mark each answer as high, medium, or low confidence ("From our handbook" / "Partly covered; please confirm" / "Not in our handbook").

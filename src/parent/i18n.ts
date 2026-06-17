@@ -44,6 +44,23 @@ export const STARTERS: Record<Lang, string[]> = {
   ],
 };
 
+/** Personal starters when a parent is viewing as a specific child. */
+export function childStarters(lang: Lang, firstName: string): string[] {
+  return lang === "es"
+    ? [
+        `¿${firstName} durmió la siesta hoy?`,
+        `¿Qué comió ${firstName} hoy?`,
+        `¿A qué hora llegó ${firstName} hoy?`,
+        "¿Cuál es el saldo de mi cuenta?",
+      ]
+    : [
+        `Did ${firstName} nap today?`,
+        `What did ${firstName} eat today?`,
+        `What time did ${firstName} check in?`,
+        "What is my account balance?",
+      ];
+}
+
 export type Strings = {
   subtitle: string;
   operatorView: string;
@@ -51,8 +68,14 @@ export type Strings = {
   startOver: string;
   taglineFallback: string;
   welcomeHint: string;
+  childWelcomeHint: string;
+  viewingAs: string;
+  generalFrontDesk: string;
+  parentOf: (name: string) => string;
+  childDemoNote: string;
   source: string;
   trust: { high: string; medium: string; low: string };
+  fromRecord: string;
   escalateTitle: string;
   placeholder: string;
   listening: string;
@@ -89,12 +112,18 @@ export const STRINGS: Record<Lang, Strings> = {
     startOver: "Start over",
     taglineFallback: "Ask us anything about the center.",
     welcomeHint: "Hours, tuition, illness policy, lunch, tours, and more.",
+    childWelcomeHint: "Naps, meals, check-in, photos, and your account.",
+    viewingAs: "Viewing as",
+    generalFrontDesk: "General front desk",
+    parentOf: (name) => `Parent of ${name}`,
+    childDemoNote: "Demo, fictional child data. Real access is per-parent and signed in.",
     source: "Source",
     trust: {
       high: "From our handbook",
       medium: "Partly covered; please confirm",
       low: "Not in our handbook",
     },
+    fromRecord: "From your child's record",
     escalateTitle: "A team member should help with this.",
     placeholder: "Ask the front desk...",
     listening: "Listening...",
@@ -137,12 +166,18 @@ export const STRINGS: Record<Lang, Strings> = {
     startOver: "Empezar de nuevo",
     taglineFallback: "Pregúntenos lo que quiera sobre el centro.",
     welcomeHint: "Horarios, matrícula, política de enfermedad, almuerzo, visitas y más.",
+    childWelcomeHint: "Siestas, comidas, asistencia, fotos y su cuenta.",
+    viewingAs: "Viendo como",
+    generalFrontDesk: "Recepción general",
+    parentOf: (name) => `Familia de ${name}`,
+    childDemoNote: "Demostración, datos ficticios del niño. El acceso real es por familia con sesión iniciada.",
     source: "Fuente",
     trust: {
       high: "De nuestro manual",
       medium: "Parcialmente cubierto; por favor confirme",
       low: "No está en nuestro manual",
     },
+    fromRecord: "Del registro de su hijo",
     escalateTitle: "Un miembro del equipo debería ayudar con esto.",
     placeholder: "Pregúntale a la recepción...",
     listening: "Escuchando...",

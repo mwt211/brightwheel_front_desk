@@ -82,7 +82,9 @@ Essentially all of the product is original to this prototype:
 | `src/parent/offline.ts` | On-device offline answering, the bilingual safety mirror, KB cache, and the request queue. Original. |
 | `public/sw.js` | The service worker, hand-rolled with no PWA build plugin (zero runtime deps). Original. |
 | `seed/center.json` | The fictional Cottonwood Sprouts handbook content. Original. |
-| Product concepts | Gap Radar, the impact dashboard, photo onboarding, urgent triage, and offline mode are original to this build. |
+| `functions/_shared/children.ts` + `seed/children.json` | Connected per-child daily record and account, injected into the answer grounding. Original. |
+| `functions/api/children.ts` | The "viewing as" family list endpoint (identity only). Original. |
+| Product concepts | Gap Radar, the impact dashboard, photo onboarding, urgent triage, offline mode, and connected per-child answers are original to this build. |
 
 ## In one sentence
 

@@ -1,8 +1,9 @@
 # End-to-End Test Report
 
 A full end-to-end test was run against the live deployment on 2026-06-17, and
-re-run after the citation-display fix noted below. All 26 automated checks
-passed. The live demo was reset to a clean, curated state after each run.
+re-run after the citation-display fix noted below. All checks passed: 26 core
+checks plus 9 for the connected-answers feature. The live demo was reset to a
+clean, curated state after each run.
 
 **Environment:** https://brightwheel-front-desk.pages.dev (parent) and
 `/operator` (operator), on Cloudflare Pages, Groq as the model with the Workers
@@ -29,6 +30,12 @@ AI fallback. Build is green (`tsc -b && vite build`, functions typecheck clean).
 | Inbox triage | Post a tour and an urgent message | Urgent fever-pickup message floated to the top of the inbox |
 | Analytics | Question log and activity history endpoints | Return logged questions and edit/teach history |
 | PWA | sw.js, manifest.webmanifest, icons | All serve 200 (service worker `cws-v2`) |
+| Connected answers | `GET /api/children` | Returns the two demo families, identity only (no record or account fields) |
+| | "Did Mateo nap today?" (viewing as parent) | Answered from the record, cited "Mateo's day," labeled "From your child's record" |
+| | "What is my balance?" for each child | Correct per-child balance ($0.00 vs $48 late fees), cited the family record |
+| | Fever question while viewing as a child | Safety net still intercepts; never answered from the record |
+| | General handbook question while viewing as a child | Still answered from the handbook (Hours & Closures) |
+| | Personal question with no family selected | Does not fabricate; declines and points to the app |
 
 ## Offline mode
 

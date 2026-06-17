@@ -8,6 +8,7 @@ import {
 import { screen } from "../_shared/safety";
 import { runJson, type ChatMsg } from "../_shared/llm";
 import { buildSystemPrompt } from "../_shared/prompt";
+import { getChild } from "../_shared/children";
 
 type HistoryMsg = { role: "user" | "assistant"; content: string };
 
@@ -55,7 +56,7 @@ const ANSWER_SCHEMA = {
 
 export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   const { env, request } = ctx;
-  let payload: { text?: string; history?: HistoryMsg[] };
+  let payload: { text?: string; history?: HistoryMsg[]; childId?: string };
   try {
     payload = await request.json();
   } catch {
@@ -66,6 +67,11 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   if (!text) return json({ error: "Empty question." }, 400);
   if (text.length > MAX_INPUT)
     return json({ error: "Question is too long." }, 413);
+
+  // Optional connected-family context. The deterministic safety net below still
+  // runs first, so a medical question about the child escalates and never reads
+  // from the record.
+  const child = getChild(payload.childId);
 
   const { kb } = await getKb(env.DB);
 
@@ -116,6 +122,7 @@ export const onRequestPost: PagesFunction<Env> = async (ctx) => {
   const system = buildSystemPrompt(
     kb as Parameters<typeof buildSystemPrompt>[0],
     new Date(nowIso()),
+    child,
   );
   const messages: ChatMsg[] = [
     { role: "system", content: system },
