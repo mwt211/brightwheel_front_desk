@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import type { AnswerPayload, ChatMessage, SuggestedAction } from "../lib/types";
 import { askQuestion, fetchKb, leaveRequest } from "../lib/api";
 import { createRecognizer, isVoiceInputSupported, type Recognizer } from "./voice";
-
-const STARTERS = [
-  "Are you open on Veterans Day?",
-  "What's the tuition for infants?",
-  "My child has a fever, can they come in?",
-  "I forgot to pack lunch. What's for lunch today?",
-  "How do I schedule a tour?",
-];
+import {
+  STRINGS,
+  STARTERS,
+  detectLang,
+  initialLang,
+  speechLang,
+  type Lang,
+} from "./i18n";
 
 function uid(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -22,12 +22,6 @@ const telHref = (value: string) => `tel:${value.replace(/[^0-9+]/g, "")}`;
 const actionable = (actions?: SuggestedAction[]) =>
   actions?.filter((a) => a.action !== "none") ?? [];
 
-// Default the voice-recognition language to the browser's; the parent can switch.
-function detectVoiceLang(): string {
-  const l = typeof navigator !== "undefined" ? navigator.language?.toLowerCase() : "";
-  return l && l.startsWith("es") ? "es-US" : "en-US";
-}
-
 export function Chat() {
   const [center, setCenter] = useState<{
     name: string;
@@ -38,13 +32,16 @@ export function Chat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
-  const [voiceLang, setVoiceLang] = useState(detectVoiceLang);
+  // One language for the whole parent surface: auto-detected from each message,
+  // also manually toggleable. Drives the UI strings and voice recognition.
+  const [lang, setLang] = useState<Lang>(initialLang);
   const [requestModal, setRequestModal] = useState<{
     kind: "tour" | "message";
     relatedId?: number;
   } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognizerRef = useRef<Recognizer | null>(null);
+  const t = STRINGS[lang];
 
   useEffect(() => {
     fetchKb()
@@ -68,6 +65,9 @@ export function Chat() {
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    // Follow the language of the message (typed or dictated) for the whole page.
+    const msgLang = detectLang(trimmed);
+    setLang(msgLang);
     const userMsg: ChatMessage = { id: uid(), role: "user", text: trimmed };
     const history = messages.map((m) => ({ role: m.role, content: m.text }));
     setMessages((prev) => [...prev, userMsg]);
@@ -82,11 +82,7 @@ export function Chat() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          id: uid(),
-          role: "assistant",
-          text: "Sorry, something went wrong reaching the front desk. Please try again, or call us.",
-        },
+        { id: uid(), role: "assistant", text: STRINGS[msgLang].sendError },
       ]);
     } finally {
       setLoading(false);
@@ -107,7 +103,7 @@ export function Chat() {
         onError: () => setListening(false),
         onEnd: () => setListening(false),
       },
-      voiceLang,
+      speechLang(lang),
     );
     if (!rec) return;
     recognizerRef.current = rec;
@@ -133,11 +129,11 @@ export function Chat() {
             {messages.length > 0 && (
               <button
                 onClick={reset}
-                aria-label="Start over"
+                aria-label={t.startOver}
                 className="shrink-0 -ml-1 flex items-center gap-1 text-xs bg-brand-600 hover:bg-brand-500 rounded-full pl-1.5 pr-2.5 py-1.5 transition"
               >
                 <BackIcon />
-                Start over
+                {t.startOver}
               </button>
             )}
             <div className="min-w-0">
@@ -145,24 +141,32 @@ export function Chat() {
                 {center?.name ?? "Cottonwood Sprouts"}
               </h1>
               <p className="text-[11px] text-brand-100 leading-tight">
-                Front Desk Assistant
+                {t.subtitle}
               </p>
             </div>
           </div>
-          {center?.phone && (
+          <div className="flex items-center gap-2 shrink-0">
             <a
-              href={telHref(center.phone)}
-              className="shrink-0 text-xs bg-brand-600 hover:bg-brand-500 rounded-full px-3 py-1.5 transition"
+              href="/operator"
+              className="text-[11px] text-brand-100/90 hover:text-white underline underline-offset-2"
             >
-              Call us
+              {t.operatorView}
             </a>
-          )}
+            {center?.phone && (
+              <a
+                href={telHref(center.phone)}
+                className="text-xs bg-brand-600 hover:bg-brand-500 rounded-full px-3 py-1.5 transition"
+              >
+                {t.callUs}
+              </a>
+            )}
+          </div>
         </div>
       </header>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
         {messages.length === 0 && (
-          <Welcome tagline={center?.tagline} onPick={send} />
+          <Welcome lang={lang} tagline={center?.tagline} onPick={send} />
         )}
         {messages.map((m) =>
           m.role === "user" ? (
@@ -170,6 +174,7 @@ export function Chat() {
           ) : (
             <AssistantBubble
               key={m.id}
+              lang={lang}
               text={m.text}
               payload={m.payload}
               onAction={(a, relatedId) => handleAction(a, relatedId)}
@@ -180,21 +185,20 @@ export function Chat() {
       </div>
 
       <Composer
+        lang={lang}
         input={input}
         setInput={setInput}
         onSend={() => send(input)}
         listening={listening}
         onToggleVoice={toggleVoice}
         voiceSupported={isVoiceInputSupported()}
-        voiceLang={voiceLang}
-        onCycleVoiceLang={() =>
-          setVoiceLang((l) => (l.startsWith("es") ? "en-US" : "es-US"))
-        }
+        onToggleLang={() => setLang((l) => (l === "es" ? "en" : "es"))}
         disabled={loading}
       />
 
       {requestModal && (
         <RequestSheet
+          lang={lang}
           kind={requestModal.kind}
           relatedId={requestModal.relatedId}
           phone={center?.phone}
@@ -216,25 +220,25 @@ export function Chat() {
 }
 
 function Welcome({
+  lang,
   tagline,
   onPick,
 }: {
+  lang: Lang;
   tagline?: string;
   onPick: (q: string) => void;
 }) {
+  const s = STRINGS[lang];
+  const greeting = lang === "en" ? (tagline ?? s.taglineFallback) : s.taglineFallback;
   return (
     <div className="text-center pt-6">
       <div className="mx-auto w-12 h-12 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-display text-xl">
         CS
       </div>
-      <p className="mt-3 text-sm text-ink/70 px-6">
-        {tagline ?? "Ask us anything about the center."}
-      </p>
-      <p className="mt-1 text-xs text-ink/50">
-        Hours, tuition, illness policy, lunch, tours, and more.
-      </p>
+      <p className="mt-3 text-sm text-ink/70 px-6">{greeting}</p>
+      <p className="mt-1 text-xs text-ink/50">{s.welcomeHint}</p>
       <div className="mt-5 flex flex-col gap-2 px-2">
-        {STARTERS.map((q) => (
+        {STARTERS[lang].map((q) => (
           <button
             key={q}
             onClick={() => onPick(q)}
@@ -259,14 +263,17 @@ function UserBubble({ text }: { text: string }) {
 }
 
 function AssistantBubble({
+  lang,
   text,
   payload,
   onAction,
 }: {
+  lang: Lang;
   text: string;
   payload?: AnswerPayload;
   onAction: (a: SuggestedAction, relatedId?: number) => void;
 }) {
+  const s = STRINGS[lang];
   const escalate = payload?.needs_human || payload?.safety_intercept;
   return (
     <div className="flex justify-start">
@@ -275,7 +282,7 @@ function AssistantBubble({
           {text}
         </div>
 
-        {payload && <TrustRow payload={payload} />}
+        {payload && <TrustRow lang={lang} payload={payload} />}
 
         {payload?.citations && payload.citations.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
@@ -285,58 +292,53 @@ function AssistantBubble({
                 title={c.quote}
                 className="text-[11px] bg-brand-50 text-brand-700 border border-brand-100 rounded-full px-2 py-0.5"
               >
-                Source: {c.section}
+                {s.source}: {c.section}
               </span>
             ))}
           </div>
         )}
 
         {escalate && payload && (
-          <EscalationCard payload={payload} onAction={onAction} />
+          <EscalationCard lang={lang} payload={payload} onAction={onAction} />
         )}
 
         {!escalate &&
           actionable(payload?.suggested_actions).map((a, i) => (
-              <button
-                key={i}
-                onClick={() => onAction(a, payload?.question_id)}
-                className="text-xs bg-amber/10 text-amber border border-amber/30 hover:bg-amber/20 rounded-full px-3 py-1 transition mr-1.5"
-              >
-                {a.label}
-              </button>
-            ))}
+            <button
+              key={i}
+              onClick={() => onAction(a, payload?.question_id)}
+              className="text-xs bg-amber/10 text-amber border border-amber/30 hover:bg-amber/20 rounded-full px-3 py-1 transition mr-1.5"
+            >
+              {a.label}
+            </button>
+          ))}
       </div>
     </div>
   );
 }
 
-function TrustRow({ payload }: { payload: AnswerPayload }) {
-  const map = {
-    high: { dot: "bg-brand-500", label: "From our handbook" },
-    medium: { dot: "bg-amber", label: "Partly covered; please confirm" },
-    low: { dot: "bg-ink/30", label: "Not in our handbook" },
-  } as const;
-  const c = map[payload.confidence];
+function TrustRow({ lang, payload }: { lang: Lang; payload: AnswerPayload }) {
+  const dot = { high: "bg-brand-500", medium: "bg-amber", low: "bg-ink/30" } as const;
   return (
     <div className="flex items-center gap-1.5 text-[11px] text-ink/55 pl-1">
-      <span className={`inline-block w-1.5 h-1.5 rounded-full ${c.dot}`} />
-      {c.label}
+      <span className={`inline-block w-1.5 h-1.5 rounded-full ${dot[payload.confidence]}`} />
+      {STRINGS[lang].trust[payload.confidence]}
     </div>
   );
 }
 
 function EscalationCard({
+  lang,
   payload,
   onAction,
 }: {
+  lang: Lang;
   payload: AnswerPayload;
   onAction: (a: SuggestedAction, relatedId?: number) => void;
 }) {
   return (
     <div className="bg-amber/5 border border-amber/30 rounded-2xl px-3.5 py-3 space-y-2">
-      <p className="text-xs font-medium text-amber">
-        A team member should help with this.
-      </p>
+      <p className="text-xs font-medium text-amber">{STRINGS[lang].escalateTitle}</p>
       <div className="flex flex-wrap gap-1.5">
         {actionable(payload.suggested_actions).map((a, i) => (
           <button
@@ -345,9 +347,8 @@ function EscalationCard({
             className="text-xs bg-brand-600 text-white hover:bg-brand-500 rounded-full px-3 py-1.5 transition"
           >
             {a.label}
-            </button>
-          ),
-        )}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -368,52 +369,50 @@ function Typing() {
 }
 
 function Composer({
+  lang,
   input,
   setInput,
   onSend,
   listening,
   onToggleVoice,
   voiceSupported,
-  voiceLang,
-  onCycleVoiceLang,
+  onToggleLang,
   disabled,
 }: {
+  lang: Lang;
   input: string;
   setInput: (v: string) => void;
   onSend: () => void;
   listening: boolean;
   onToggleVoice: () => void;
   voiceSupported: boolean;
-  voiceLang: string;
-  onCycleVoiceLang: () => void;
+  onToggleLang: () => void;
   disabled: boolean;
 }) {
-  const isES = voiceLang.startsWith("es");
+  const s = STRINGS[lang];
   return (
     <div className="sticky bottom-0 bg-cream border-t border-brand-100 px-3 py-2.5">
       <div className="flex items-end gap-2">
+        <button
+          onClick={onToggleLang}
+          aria-label="Language"
+          title={s.langTitle}
+          className="shrink-0 w-9 h-10 rounded-full border border-brand-200 bg-white text-brand-700 text-[11px] font-semibold hover:border-brand-400 transition"
+        >
+          {lang.toUpperCase()}
+        </button>
         {voiceSupported && (
-          <>
-            <button
-              onClick={onCycleVoiceLang}
-              aria-label="Voice language"
-              title={`Voice language: ${isES ? "Spanish" : "English"} (tap to switch)`}
-              className="shrink-0 w-9 h-10 rounded-full border border-brand-200 bg-white text-brand-700 text-[11px] font-semibold hover:border-brand-400 transition"
-            >
-              {isES ? "ES" : "EN"}
-            </button>
-            <button
-              onClick={onToggleVoice}
-              aria-label="Voice input"
-              className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center border transition ${
-                listening
-                  ? "bg-amber text-white border-amber animate-pulse"
-                  : "bg-white text-brand-700 border-brand-200 hover:border-brand-400"
-              }`}
-            >
-              <MicIcon />
-            </button>
-          </>
+          <button
+            onClick={onToggleVoice}
+            aria-label="Voice input"
+            className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center border transition ${
+              listening
+                ? "bg-amber text-white border-amber animate-pulse"
+                : "bg-white text-brand-700 border-brand-200 hover:border-brand-400"
+            }`}
+          >
+            <MicIcon />
+          </button>
         )}
         <textarea
           value={input}
@@ -425,36 +424,37 @@ function Composer({
             }
           }}
           rows={1}
-          placeholder={listening ? "Listening..." : "Ask the front desk..."}
+          placeholder={listening ? s.listening : s.placeholder}
           className="flex-1 resize-none bg-white border border-brand-200 focus:border-brand-400 outline-none rounded-2xl px-3.5 py-2.5 text-sm max-h-28"
         />
         <button
           onClick={onSend}
           disabled={disabled || !input.trim()}
           className="shrink-0 w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center disabled:opacity-40 hover:bg-brand-500 transition"
-          aria-label="Send"
+          aria-label={s.send}
         >
           <SendIcon />
         </button>
       </div>
-      <p className="text-[10px] text-ink/40 text-center mt-1.5">
-        Demo assistant for a fictional center. Not real medical or personal advice.
-      </p>
+      <p className="text-[10px] text-ink/40 text-center mt-1.5">{s.demoNote}</p>
     </div>
   );
 }
 
 function RequestSheet({
+  lang,
   kind,
   relatedId,
   phone,
   onClose,
 }: {
+  lang: Lang;
   kind: "tour" | "message";
   relatedId?: number;
   phone?: string;
   onClose: () => void;
 }) {
+  const s = STRINGS[lang];
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [message, setMessage] = useState("");
@@ -470,12 +470,9 @@ function RequestSheet({
         kind,
         name,
         contact,
-        message:
-          message ||
-          (kind === "tour" ? "Requested a tour." : "Asked for a callback."),
+        message: message || (kind === "tour" ? s.reqDefaultTour : s.reqDefaultMsg),
         related_question_id: relatedId ?? null,
       });
-      // Only confirm if the server actually accepted it.
       if (res && res.ok) setSent(true);
       else setFailed(true);
     } catch {
@@ -496,69 +493,54 @@ function RequestSheet({
       >
         {sent ? (
           <div className="text-center py-4 space-y-2">
-            <p className="font-semibold text-brand-700">Thank you.</p>
-            <p className="text-sm text-ink/70">
-              The front desk has your {kind === "tour" ? "tour request" : "message"} and
-              will follow up. {phone ? `For anything urgent, call ${phone}.` : ""}
-            </p>
+            <p className="font-semibold text-brand-700">{s.thankYou}</p>
+            <p className="text-sm text-ink/70">{s.thankBody(kind, phone)}</p>
             <button
               onClick={onClose}
               className="mt-2 text-sm bg-brand-600 text-white rounded-full px-4 py-2"
             >
-              Done
+              {s.done}
             </button>
           </div>
         ) : (
           <>
             <h2 className="font-semibold text-ink">
-              {kind === "tour" ? "Request a tour" : "Message the front desk"}
+              {kind === "tour" ? s.tourTitle : s.msgTitle}
             </h2>
-            <p className="text-xs text-ink/60">
-              Leave your details and the team will get back to you. (Demo, no real
-              data.)
-            </p>
+            <p className="text-xs text-ink/60">{s.sheetIntro}</p>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
+              placeholder={s.namePh}
               className="w-full bg-white border border-brand-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-400"
             />
             <input
               value={contact}
               onChange={(e) => setContact(e.target.value)}
-              placeholder="Phone or email"
+              placeholder={s.contactPh}
               className="w-full bg-white border border-brand-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-400"
             />
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder={
-                kind === "tour"
-                  ? "Anything we should know? (optional)"
-                  : "Your message"
-              }
+              placeholder={kind === "tour" ? s.tourMsgPh : s.msgMsgPh}
               rows={3}
               className="w-full bg-white border border-brand-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-400 resize-none"
             />
-            {failed && (
-              <p className="text-xs text-amber">
-                That didn't go through. Please try again
-                {phone ? `, or call ${phone}` : ""}.
-              </p>
-            )}
+            {failed && <p className="text-xs text-amber">{s.failed(phone)}</p>}
             <div className="flex gap-2 pt-1">
               <button
                 onClick={onClose}
                 className="flex-1 text-sm border border-brand-200 rounded-full py-2"
               >
-                Cancel
+                {s.cancel}
               </button>
               <button
                 onClick={submit}
                 disabled={busy}
                 className="flex-1 text-sm bg-brand-600 text-white rounded-full py-2 disabled:opacity-50"
               >
-                {busy ? "Sending..." : "Send"}
+                {busy ? s.sending : s.send}
               </button>
             </div>
           </>
