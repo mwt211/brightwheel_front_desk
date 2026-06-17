@@ -28,7 +28,8 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Rationale, tradeoffs, brightwheel alignment, roadmap. |
 | [docs/PROVENANCE.md](docs/PROVENANCE.md) | What we reused (open source, prior projects) vs. built, and why. |
 | [functions/README.md](functions/README.md) | Backend layer (Pages Functions). |
-| [docs/demo-script.md](docs/demo-script.md) | A ~2 minute demo walkthrough. |
+| [docs/demo-script.md](docs/demo-script.md) | A roughly two-minute demo walkthrough. |
+| [docs/TEST-REPORT.md](docs/TEST-REPORT.md) | End-to-end test results against the live site. |
 
 ## Features
 
