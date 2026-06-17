@@ -1,4 +1,4 @@
-# Feature list
+# Feature List
 
 Every feature in the AI Front Desk, with what it does and why it exists. Grouped
 by the parent experience, the operator experience, and the platform/trust layer

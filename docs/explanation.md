@@ -1,4 +1,4 @@
-# AI Front Desk for early education
+# AI Front Desk for Early Education
 
 **Live demo**
 - Parent front desk: **https://brightwheel-front-desk.pages.dev**

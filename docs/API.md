@@ -1,4 +1,4 @@
-# API reference
+# API Reference
 
 All endpoints are Cloudflare Pages Functions under `/api`, same origin as the
 SPA. Public endpoints are unauthenticated; operator endpoints pass through
@@ -47,10 +47,10 @@ the handbook changed since `version` was read.
 
 ## GET /api/questions  (operator)
 
-- `?view=log` (default): `{ questions: [...] }` — the full log.
-- `?view=gaps`: `{ clusters: [...] }` — Gap Radar themes, each with example
+- `?view=log` (default): `{ questions: [...] }`, the full log.
+- `?view=gaps`: `{ clusters: [...] }`, the Gap Radar themes, each with example
   questions, a `reviewOnly` flag, and a drafted `{ title, body }` section.
-- `?view=history`: `{ history: [...] }` — the activity trail.
+- `?view=history`: `{ history: [...] }`, the activity trail.
 
 ## POST /api/questions  (operator)
 

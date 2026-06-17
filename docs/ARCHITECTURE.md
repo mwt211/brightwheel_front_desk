@@ -129,13 +129,13 @@ characters that open models sometimes emit.
 
 ## Data model (Cloudflare D1)
 
-- `kb (id=1, json, version, updated_at)` — the whole handbook as one JSON row,
+- `kb (id=1, json, version, updated_at)`: the whole handbook as one JSON row,
   written with optimistic concurrency (writers send the version they read).
-- `questions (...)` — the log: text, answer, confidence, category, status,
-  needs_human, escalation_reason, citations.
-- `requests (..., urgent)` — captured tour requests and messages; `urgent` is a
+- `questions (...)`: the log of text, answer, confidence, category, status,
+  needs_human, escalation_reason, and citations.
+- `requests (..., urgent)`: captured tour requests and messages; `urgent` is a
   deterministic flag that floats time-sensitive messages to the top of the inbox.
-- `kb_history (...)` — an audit trail of edits and taught entries.
+- `kb_history (...)`: an audit trail of edits and taught entries.
 
 ## Security and guardrails
 

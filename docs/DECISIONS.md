@@ -1,4 +1,4 @@
-# Decisions and rationale
+# Decisions and Rationale
 
 The "why" behind the build, the tradeoffs taken, and how it maps to brightwheel.
 

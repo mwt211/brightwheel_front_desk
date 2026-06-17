@@ -1,8 +1,8 @@
-# Cottonwood Sprouts AI Front Desk — Full Documentation
+# Cottonwood Sprouts AI Front Desk: Full Documentation
 
 This single document consolidates every project document for easy reading and sharing. Nothing has been removed: each source file still lives on its own, and this is an assembled copy of all of them in one place.
 
-**Live demo:** parent https://brightwheel-front-desk.pages.dev · operator https://brightwheel-front-desk.pages.dev/operator
+**Live demo:** parent https://brightwheel-front-desk.pages.dev / operator https://brightwheel-front-desk.pages.dev/operator
 
 ## Contents
 
@@ -44,6 +44,7 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 
 | Doc | What it covers |
 | --- | --- |
+| [docs/FULL-DOCUMENTATION.md](docs/FULL-DOCUMENTATION.md) | Everything below, consolidated into one document. |
 | [docs/explanation.md](docs/explanation.md) | The one-page summary to send with the live link. |
 | [docs/FEATURES.md](docs/FEATURES.md) | Every feature, with the what and the why. |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Full system walkthrough and request lifecycle. |
@@ -151,7 +152,7 @@ Re-implement `runJson` / `runVisionJson` in `functions/_shared/llm.ts`. The curr
 
 > Consolidated from `docs/explanation.md`
 
-# AI Front Desk for early education
+# AI Front Desk for Early Education
 
 **Live demo**
 - Parent front desk: **https://brightwheel-front-desk.pages.dev**
@@ -203,7 +204,7 @@ Fictional data, no personal data used or requested. The live demo runs on a free
 
 > Consolidated from `docs/FEATURES.md`
 
-# Feature list
+# Feature List
 
 Every feature in the AI Front Desk, with what it does and why it exists. Grouped
 by the parent experience, the operator experience, and the platform/trust layer
@@ -479,13 +480,13 @@ characters that open models sometimes emit.
 
 ## Data model (Cloudflare D1)
 
-- `kb (id=1, json, version, updated_at)` — the whole handbook as one JSON row,
+- `kb (id=1, json, version, updated_at)`: the whole handbook as one JSON row,
   written with optimistic concurrency (writers send the version they read).
-- `questions (...)` — the log: text, answer, confidence, category, status,
-  needs_human, escalation_reason, citations.
-- `requests (..., urgent)` — captured tour requests and messages; `urgent` is a
+- `questions (...)`: the log of text, answer, confidence, category, status,
+  needs_human, escalation_reason, and citations.
+- `requests (..., urgent)`: captured tour requests and messages; `urgent` is a
   deterministic flag that floats time-sensitive messages to the top of the inbox.
-- `kb_history (...)` — an audit trail of edits and taught entries.
+- `kb_history (...)`: an audit trail of edits and taught entries.
 
 ## Security and guardrails
 
@@ -534,7 +535,7 @@ src/
 
 > Consolidated from `docs/API.md`
 
-# API reference
+# API Reference
 
 All endpoints are Cloudflare Pages Functions under `/api`, same origin as the
 SPA. Public endpoints are unauthenticated; operator endpoints pass through
@@ -583,10 +584,10 @@ the handbook changed since `version` was read.
 
 ## GET /api/questions  (operator)
 
-- `?view=log` (default): `{ questions: [...] }` — the full log.
-- `?view=gaps`: `{ clusters: [...] }` — Gap Radar themes, each with example
+- `?view=log` (default): `{ questions: [...] }`, the full log.
+- `?view=gaps`: `{ clusters: [...] }`, the Gap Radar themes, each with example
   questions, a `reviewOnly` flag, and a drafted `{ title, body }` section.
-- `?view=history`: `{ history: [...] }` — the activity trail.
+- `?view=history`: `{ history: [...] }`, the activity trail.
 
 ## POST /api/questions  (operator)
 
@@ -623,7 +624,7 @@ images), 413 (too large), 422 (unreadable), 502 (upstream failure).
 
 > Consolidated from `docs/DECISIONS.md`
 
-# Decisions and rationale
+# Decisions and Rationale
 
 The "why" behind the build, the tradeoffs taken, and how it maps to brightwheel.
 
@@ -674,7 +675,7 @@ operator login with human review on taught entries.
 
 > Consolidated from `docs/PROVENANCE.md`
 
-# Code provenance: what we reused and what we built
+# Code Provenance
 
 An honest accounting of where the code in this prototype came from: open-source
 dependencies, code adapted from prior projects, patterns we learned from
@@ -715,7 +716,7 @@ Two of the author's earlier projects on the same machine informed a small amount
 of this code. These are personal projects, not public open-source repos, so this
 is internal reuse rather than an open-source dependency.
 
-- **`src/parent/voice.ts`** — adapted from the "Sally" personal-assistant app. It
+- **`src/parent/voice.ts`**: adapted from the "Sally" personal-assistant app. It
   is a thin, feature-detected wrapper over the browser Web Speech API. We took
   the `SpeechRecognition` portion, dropped Sally's `MediaRecorder` + Whisper
   fallback, and then extended it in this project to accept a language so
@@ -811,27 +812,27 @@ grounding, the self-teaching loop, the photo onboarding, and both UIs ourselves.
 
 > Consolidated from `docs/demo-script.md`
 
-# ~2 minute demo script
+# Demo Script
 
-A tight walkthrough for a screen recording or live demo. Two tabs open: parent at `/`, operator at `/operator`.
+A tight walkthrough (about two minutes) for a screen recording or live demo. Two tabs open: parent at `/`, operator at `/operator`.
 
-## 0:00 to 0:15 — The hook
+## The Hook (0:00 to 0:15)
 "Admins lose hours a day answering the same questions, and parents just want a fast answer they can trust. This is an out-of-the-box AI Front Desk. Here is the parent side."
 
-## 0:15 to 0:45 — Trustworthy, grounded answers
+## Trustworthy, Grounded Answers (0:15 to 0:45)
 On the parent tab, tap the starters in order:
 - "Are you open on Veterans Day?" Point out the answer plus the "Source: Hours & Closures" chip and the confidence dot.
 - "What's the tuition for infants?" Note the exact figure with its citation. "Grounded in the handbook, not guessed."
 - "I forgot to pack lunch. What's for lunch today?" Note it knows today's menu.
 
-## 0:45 to 1:05 — Multilingual and safety
-- Type a question in Spanish, for example "cuanto cuesta para bebes?" It answers in Spanish, still cited. "It meets families in their language."
+## Multilingual and Safety (0:45 to 1:05)
+- Type a question in Spanish, for example "cuanto cuesta para bebes?" The whole page switches to Spanish and the answer is cited. "It meets families in their language."
 - Ask "My child has a fever, can they come in?" (or the Spanish equivalent). "This never gives medical advice. A deterministic safety net, in both languages, catches it before the model, shares the policy, and routes to a person."
 - Ask "Do you have a swimming pool?" "Not in the handbook, so it does not bluff. It says so, offers a human, and logs this as a gap."
 
-## 1:05 to 1:45 — The operator side and the loop
+## The Operator Side and the Loop (1:05 to 1:45)
 Switch to the operator tab:
-- Impact view: "Staff time saved, answer rate, top topics. Less admin, more impact." 
+- Impact view: "Staff time saved, answer rate, top topics. Less admin, more impact."
 - Inbox: "Urgent messages are triaged to the top." Point at the flagged fever pickup.
 - Handbook tab, "Import from a photo": "A brand-new center can onboard in minutes. Snap the paper handbook and we draft the sections." Upload `docs/sample-handbook.png` and watch the new sections appear for review.
 - Gap Radar: click "Scan for gaps." "It groups the questions the bot could not answer and drafts a handbook entry for each. Health topics are flagged review-only." Approve the swimming-pool draft.

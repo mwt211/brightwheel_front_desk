@@ -1,4 +1,4 @@
-# Code provenance: what we reused and what we built
+# Code Provenance
 
 An honest accounting of where the code in this prototype came from: open-source
 dependencies, code adapted from prior projects, patterns we learned from
@@ -39,7 +39,7 @@ Two of the author's earlier projects on the same machine informed a small amount
 of this code. These are personal projects, not public open-source repos, so this
 is internal reuse rather than an open-source dependency.
 
-- **`src/parent/voice.ts`** — adapted from the "Sally" personal-assistant app. It
+- **`src/parent/voice.ts`**: adapted from the "Sally" personal-assistant app. It
   is a thin, feature-detected wrapper over the browser Web Speech API. We took
   the `SpeechRecognition` portion, dropped Sally's `MediaRecorder` + Whisper
   fallback, and then extended it in this project to accept a language so
