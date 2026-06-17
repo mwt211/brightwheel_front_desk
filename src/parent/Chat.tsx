@@ -105,22 +105,44 @@ export function Chat() {
     rec.start();
   }
 
+  // Clear the thread and return to the welcome screen with the starter prompts,
+  // so a parent (or a reviewer) is never stuck on one question.
+  function reset() {
+    recognizerRef.current?.stop();
+    setListening(false);
+    setMessages([]);
+    setInput("");
+    setRequestModal(null);
+  }
+
   return (
     <div className="flex flex-col h-full max-w-md mx-auto bg-cream">
       <header className="sticky top-0 z-10 bg-brand-700 text-white px-4 py-3 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-semibold leading-tight">
-              {center?.name ?? "Cottonwood Sprouts"}
-            </h1>
-            <p className="text-[11px] text-brand-100 leading-tight">
-              Front Desk Assistant
-            </p>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            {messages.length > 0 && (
+              <button
+                onClick={reset}
+                aria-label="Start over"
+                className="shrink-0 -ml-1 flex items-center gap-1 text-xs bg-brand-600 hover:bg-brand-500 rounded-full pl-1.5 pr-2.5 py-1.5 transition"
+              >
+                <BackIcon />
+                Start over
+              </button>
+            )}
+            <div className="min-w-0">
+              <h1 className="font-semibold leading-tight truncate">
+                {center?.name ?? "Cottonwood Sprouts"}
+              </h1>
+              <p className="text-[11px] text-brand-100 leading-tight">
+                Front Desk Assistant
+              </p>
+            </div>
           </div>
           {center?.phone && (
             <a
               href={telHref(center.phone)}
-              className="text-xs bg-brand-600 hover:bg-brand-500 rounded-full px-3 py-1.5 transition"
+              className="shrink-0 text-xs bg-brand-600 hover:bg-brand-500 rounded-full px-3 py-1.5 transition"
             >
               Call us
             </a>
@@ -514,6 +536,15 @@ function RequestSheet({
         )}
       </div>
     </div>
+  );
+}
+
+function BackIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </svg>
   );
 }
 
