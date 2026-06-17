@@ -558,17 +558,22 @@ function PhotoImport({
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [drafted, setDrafted] = useState<{ title: string; body: string }[] | null>(
+    null,
+  );
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     setBusy(true);
     setError(null);
+    setDrafted(null);
     try {
       const urls = await Promise.all(
         Array.from(files).slice(0, 4).map(readAsDataUrl),
       );
       const res = await ingestHandbookPhotos(urls);
-      if (res.sections && res.sections.length > 0) onSections(res.sections);
+      // Show what we read before adding, so the operator sees the work done.
+      if (res.sections && res.sections.length > 0) setDrafted(res.sections);
       else setError(res.error ?? "No sections were found in those photos.");
     } catch {
       setError("Could not read those photos. Try again.");
@@ -582,11 +587,11 @@ function PhotoImport({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-brand-800">
-            Import from a photo
+            Onboard from your paper handbook
           </p>
           <p className="text-[11px] text-ink/60">
-            New to the platform? Snap a picture of your paper handbook and we'll
-            draft the sections for you to review.
+            Snap a photo of your handbook and we'll draft the sections for you to
+            review. No retyping.
           </p>
         </div>
         <label
@@ -612,7 +617,42 @@ function PhotoImport({
           />
         </label>
       </div>
+
+      {busy && (
+        <p className="text-xs text-ink/60 mt-2">Reading your handbook...</p>
+      )}
       {error && <p className="text-xs text-amber mt-2">{error}</p>}
+
+      {drafted && (
+        <div className="mt-3 bg-white border border-brand-100 rounded-lg p-3">
+          <p className="text-sm font-medium text-brand-800">
+            We read your handbook and drafted {drafted.length} section
+            {drafted.length === 1 ? "" : "s"}:
+          </p>
+          <ul className="text-xs text-ink/70 list-disc pl-4 mt-1.5 space-y-0.5">
+            {drafted.map((s, i) => (
+              <li key={i}>{s.title}</li>
+            ))}
+          </ul>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => {
+                onSections(drafted);
+                setDrafted(null);
+              }}
+              className="text-sm bg-brand-600 text-white rounded-full px-4 py-2 hover:bg-brand-500"
+            >
+              Add to handbook
+            </button>
+            <button
+              onClick={() => setDrafted(null)}
+              className="text-sm border border-brand-200 rounded-full px-4 py-2"
+            >
+              Discard
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
