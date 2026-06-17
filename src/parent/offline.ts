@@ -68,7 +68,33 @@ const SAFETY =
 const SPANISH =
   /[ñáéíóú¿¡]|\b(mi hijo|mi hija|tiene|puede|cu[aá]nto|debo|deber[ií]a|est[aá]|enfermo|enferma|fiebre|hola|gracias|por favor|necesito|ayuda)\b/i;
 
-function screen(text: string, phone: string, director: string, lang: Lang): AnswerPayload | null {
+// Mirrors the server's clip() (functions/_shared/safety.ts), kept in lockstep
+// like the safety regexes so the online and offline policy quote are identical.
+function clip(text: string, max: number): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  if (flat.length <= max) return flat;
+  const cut = flat.slice(0, max);
+  const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("? "), cut.lastIndexOf("! "));
+  if (stop > max * 0.5) return cut.slice(0, stop + 1).trim();
+  const space = cut.lastIndexOf(" ");
+  return (space > 0 ? cut.slice(0, space) : cut).trim() + "…";
+}
+
+// Short, clean quote from the cached illness policy so an offline escalation
+// can still SHOW what the handbook says, in parity with the server.
+function illnessQuote(kb: CenterKB): { section: string; quote: string }[] {
+  const section = kb.sections?.find((s) => /illness/i.test(s.title));
+  if (!section) return [];
+  return [{ section: section.title, quote: clip(section.body, 320) }];
+}
+
+function screen(
+  text: string,
+  phone: string,
+  director: string,
+  lang: Lang,
+  kb: CenterKB,
+): AnswerPayload | null {
   // Offline also honors the explicit language toggle (lang), not just detected
   // Spanish, so the escalation matches the language the parent is reading.
   const es = lang === "es" || SPANISH.test(text);
@@ -77,10 +103,14 @@ function screen(text: string, phone: string, director: string, lang: Lang): Answ
     action: "call",
     value: phone,
   };
-  const mk = (answer: string, reason: string): AnswerPayload => ({
+  const mk = (
+    answer: string,
+    reason: string,
+    citations: { section: string; quote: string }[] = [],
+  ): AnswerPayload => ({
     answer,
     confidence: "high",
-    citations: [],
+    citations,
     category: "illness_health",
     needs_human: true,
     escalation_reason: reason,
@@ -99,9 +129,10 @@ function screen(text: string, phone: string, director: string, lang: Lang): Answ
   if (MEDICATION.test(text) || ILLNESS.test(text)) {
     return mk(
       es
-        ? `No puedo dar consejos médicos, y ahora está sin conexión. Cuando tenga dudas sobre enfermedad o medicinas, llame al centro al ${phone} y pregunte por ${director}, o consulte a su pediatra.`
-        : `I can't give medical advice, and you're currently offline. For illness or medication questions, please call the center at ${phone} and ask for ${director}, or check with your pediatrician.`,
+        ? `No puedo dar consejos médicos y ahora está sin conexión. Esto es lo que dice nuestro manual; cuando tenga dudas, llame al centro al ${phone} y pregunte por ${director}, o consulte a su pediatra.`
+        : `I can't give medical advice, and you're currently offline. Here is what our handbook says; when you're unsure, please call the center at ${phone} and ask for ${director}, or check with your pediatrician.`,
       "Offline: health question routed to a human.",
+      illnessQuote(kb),
     );
   }
   if (SAFETY.test(text)) {
@@ -139,7 +170,7 @@ export function answerOffline(kb: CenterKB, text: string, lang: Lang): AnswerPay
   const phone = kb.center?.phone ?? "the front desk";
   const director = kb.center?.director ?? (es ? "la directora" : "the director");
 
-  const safety = screen(text, phone, director, lang);
+  const safety = screen(text, phone, director, lang, kb);
   if (safety) return safety;
 
   const msg: SuggestedAction = {

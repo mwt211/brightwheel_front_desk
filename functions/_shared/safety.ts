@@ -47,11 +47,33 @@ const SAFETY =
 const SPANISH =
   /[ñáéíóú¿¡]|\b(mi hijo|mi hija|tiene|puede|cu[aá]nto|debo|deber[ií]a|est[aá]|enfermo|enferma|fiebre|hola|gracias|por favor|necesito|ayuda)\b/i;
 
-function illnessCitation(kb: Kb): Citation[] {
+// Trim to a sentence (or word) boundary so the quote we SHOW a parent never
+// cuts off mid-word.
+function clip(text: string, max: number): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  if (flat.length <= max) return flat;
+  const cut = flat.slice(0, max);
+  const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("? "), cut.lastIndexOf("! "));
+  if (stop > max * 0.5) return cut.slice(0, stop + 1).trim();
+  const space = cut.lastIndexOf(" ");
+  return (space > 0 ? cut.slice(0, space) : cut).trim() + "…";
+}
+
+// Pulls a short, on-point quote from the illness policy so the parent actually
+// SEES what the handbook says, not just a section name. `prefer` lets the
+// medication branch surface the medication line instead of the fever criteria.
+function illnessCitation(kb: Kb, prefer?: RegExp): Citation[] {
   const section = kb.sections?.find((s) => /illness/i.test(s.title));
   if (!section) return [];
-  const firstLines = section.body.split("\n").slice(0, 4).join(" ").trim();
-  return [{ section: section.title, quote: firstLines.slice(0, 220) }];
+  let quote = clip(section.body, 320);
+  if (prefer) {
+    const sentence = section.body
+      .replace(/\s+/g, " ")
+      .split(/(?<=[.?!])\s+/)
+      .find((s) => prefer.test(s));
+    if (sentence) quote = clip(sentence, 320);
+  }
+  return [{ section: section.title, quote }];
 }
 
 const L = (es: boolean, en: string, esText: string) => (es ? esText : en);
@@ -95,7 +117,7 @@ export function screen(text: string, kb: Kb): SafetyResult | null {
         `Le entiendo y quiero ayudarle bien. No puedo dar consejos médicos ni indicaciones sobre medicinas o dosis. Su pediatra es la mejor persona para eso. Para lo que administramos en el centro seguimos una autorización firmada y las instrucciones de la etiqueta. Llámenos al ${phone} y pregunte por ${director}, y lo revisamos con usted.`,
       ),
       confidence: "high",
-      citations: illnessCitation(kb),
+      citations: illnessCitation(kb, /medicat|dose|advise/i),
       category: "illness_health",
       needs_human: true,
       escalation_reason: "Question asks for medication or dosing guidance.",

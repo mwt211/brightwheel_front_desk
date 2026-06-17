@@ -337,16 +337,29 @@ function AssistantBubble({
         )}
 
         {payload?.citations && payload.citations.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {payload.citations.map((c, i) => (
-              <span
-                key={i}
-                title={c.quote}
-                className="text-[11px] bg-brand-50 text-brand-700 border border-brand-100 rounded-full px-2 py-0.5"
-              >
-                {s.source}: {c.section}
-              </span>
-            ))}
+          <div className="space-y-1.5">
+            {payload.citations.map((c, i) =>
+              c.quote ? (
+                // Show the actual handbook text, not just the section name, so a
+                // grounded or escalated answer visibly delivers the source it cites.
+                <div
+                  key={i}
+                  className="border-l-2 border-brand-300 bg-brand-50 rounded-r-lg px-3 py-2"
+                >
+                  <p className="text-[12px] italic leading-snug text-ink/75">{c.quote}</p>
+                  <p className="mt-1 text-[11px] font-medium text-brand-700">
+                    {s.source}: {c.section}
+                  </p>
+                </div>
+              ) : (
+                <span
+                  key={i}
+                  className="inline-block text-[11px] bg-brand-50 text-brand-700 border border-brand-100 rounded-full px-2 py-0.5"
+                >
+                  {s.source}: {c.section}
+                </span>
+              ),
+            )}
           </div>
         )}
 
