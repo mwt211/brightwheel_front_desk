@@ -20,6 +20,7 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 
 | Doc | What it covers |
 | --- | --- |
+| [docs/FULL-DOCUMENTATION.md](docs/FULL-DOCUMENTATION.md) | Everything below, consolidated into one document. |
 | [docs/explanation.md](docs/explanation.md) | The one-page summary to send with the live link. |
 | [docs/FEATURES.md](docs/FEATURES.md) | Every feature, with the what and the why. |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Full system walkthrough and request lifecycle. |

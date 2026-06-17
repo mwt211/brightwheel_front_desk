@@ -14,16 +14,16 @@ that underpins both. For how they fit together see
 - **Why:** Handbooks are unsearchable on a phone and operators can't always pick up. The whole point is a fast answer in the moment, the way the parent actually asks.
 
 ### Voice input
-- **What:** A microphone button dictates the question using the browser's Web Speech API; it is feature-detected and silently hidden where unsupported. An EN/ES toggle next to the mic sets the recognition language (defaulting to the browser's), so dictation works in English and Spanish.
+- **What:** A microphone button dictates the question using the browser's Web Speech API; it is feature-detected and silently hidden where unsupported. Dictation works in English and Spanish, following the page-language toggle next to it (which sets both the UI language and the recognition language, defaulting to the browser's).
 - **Why:** Parents are often hands-full (holding a child, in the pickup line, driving up). Voice removes the friction of typing, and supporting Spanish dictation extends the multilingual promise to the voice path, not just typing.
 
 ### Starter questions
 - **What:** The welcome screen offers the most common questions as one-tap chips (hours, infant tuition, fever, lunch, tours).
 - **Why:** They solve the cold-start problem, show the assistant's scope at a glance, and let a parent get value in a single tap.
 
-### Multilingual answers (Spanish today)
-- **What:** The assistant detects the language of the question and answers in it; ask in Spanish and it replies in Spanish.
-- **Why:** A large share of childcare families speak Spanish. Equitable access is core to brightwheel's mission, and a parent should never have to translate their own question.
+### Multilingual, whole-page (Spanish today)
+- **What:** The assistant answers in the language of the question, and the entire parent UI follows. The language is auto-detected from each sent message (typed or dictated), so when a parent writes or speaks Spanish, every label, starter, button, and the request form switch to Spanish, and back to English just as easily. A manual EN/ES toggle is also available and sets the voice-recognition language to match.
+- **Why:** A large share of childcare families speak Spanish. Equitable access is core to brightwheel's mission, and a parent should never have to translate their own question or read a half-translated page.
 
 ### Grounded, cited answers
 - **What:** Every answer is drawn only from the center's handbook and shows the source section as a chip ("Source: Tuition & Fees").
@@ -97,9 +97,9 @@ that underpins both. For how they fit together see
 - **What:** A log records handbook edits and entries taught through Gap Radar, with timestamps.
 - **Why:** Transparency. The operator (and anyone reviewing) can see how the knowledge base evolved and what the assistant was taught.
 
-### Operator gate and parent-view toggle
-- **What:** A link switches between the parent and operator views; operator write routes pass through a soft passcode gate that is open in the demo and enforced when `OPERATOR_PASSCODE` is set.
-- **Why:** Easy navigation for a reviewer, with a clear path to lock the console down for a real deployment.
+### Parent/operator view toggle and gate
+- **What:** Each view links to the other: the operator console has a "Parent view" link and the parent header has an "Operator view" link, so a reviewer can bounce between the two perspectives in one click. Operator write routes pass through a soft passcode gate that is open in the demo and enforced when `OPERATOR_PASSCODE` is set.
+- **Why:** Easy navigation between the two sides for a demo, with a clear path to hide the operator entry point and lock the console down for a real deployment.
 
 ---
 
