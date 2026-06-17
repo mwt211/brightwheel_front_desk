@@ -1,0 +1,6 @@
+# Copy this to .dev.vars (gitignored) for local `wrangler pages dev`.
+# In production these AWS secrets are set with `wrangler pages secret put ...`.
+AWS_ACCESS_KEY_ID = "your-access-key-id"
+AWS_SECRET_ACCESS_KEY = "your-secret-access-key"
+# Optional: gate the operator console. Leave unset to keep it open in the demo.
+# OPERATOR_PASSCODE = "sprouts2026"

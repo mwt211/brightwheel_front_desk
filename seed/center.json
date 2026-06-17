@@ -1,0 +1,83 @@
+{
+  "center": {
+    "name": "Cottonwood Sprouts Early Learning",
+    "tagline": "A warm, play-based start in the heart of Albuquerque.",
+    "city": "Albuquerque, NM",
+    "phone": "(505) 555-0142",
+    "email": "hello@cottonwoodsprouts.example",
+    "director": "Maria Delgado",
+    "ages": "6 weeks to 5 years",
+    "hours": "Monday through Friday, 7:00 AM to 6:00 PM"
+  },
+  "sections": [
+    {
+      "title": "Hours & Closures",
+      "body": "We are open Monday through Friday, 7:00 AM to 6:00 PM. We are closed on weekends.\n\nWe observe these holiday closures each year: New Year's Day, Memorial Day, Juneteenth (June 19), Independence Day, Labor Day, Thanksgiving (both Thursday and the Friday after), Christmas Eve, and Christmas Day. We also close for two staff in-service days each year, announced at least four weeks ahead in the app.\n\nWe remain OPEN with normal hours on Veterans Day, Presidents' Day, Indigenous Peoples' Day, and Halloween. When a holiday falls on a weekend, the closure is observed on the nearest weekday and posted in advance."
+    },
+    {
+      "title": "Tuition & Fees",
+      "body": "Tuition is billed monthly and covers all meals and snacks. Current full-time rates:\n- Infant room (6 weeks to 18 months): $1,485 per month\n- Toddler room (18 months to 3 years): $1,215 per month\n- Preschool room (3 to 5 years): $995 per month\n\nA part-time schedule (three days per week) is available at 70% of the full-time rate. There is a one-time annual registration fee of $150 per child, and a 10% sibling discount for the younger child. Tuition is due on the 1st of each month; a $35 late fee applies after the 5th. A two-week tuition deposit is collected at enrollment and applied to your final month."
+    },
+    {
+      "title": "Illness & Exclusion Policy",
+      "body": "To keep every child healthy, please keep your child home if they have any of the following, and for at least 24 hours after it resolves:\n- A fever of 100.4°F or higher. Children may return once they are fever-free for 24 hours WITHOUT fever-reducing medicine such as acetaminophen or ibuprofen.\n- Vomiting or diarrhea, two or more times in the prior 24 hours.\n- An undiagnosed rash, or eyes that are red with discharge (possible conjunctivitis), until cleared or treated for 24 hours.\n- A persistent cough or difficulty breathing.\n\nOur teachers care for your child but are not able to diagnose illness or advise on medication or doses. When you are unsure whether to bring your child in, please call us at (505) 555-0142 and ask for Director Maria Delgado, or check with your pediatrician. If your child has a medical emergency, call 911 first. We are a nut-free facility."
+    },
+    {
+      "title": "Meals & Snacks",
+      "body": "All meals are included in tuition and prepared on site: a morning snack, a hot lunch, and an afternoon snack each day. We are a nut-free facility and can accommodate documented allergies and dietary needs with a form on file. The weekly lunch menu is posted in the app every Sunday.\n\nFamilies do not need to pack lunch. If you ever forget something your child needs, just let a teacher know; we will provide that day's lunch and snacks at no extra charge. Please send a labeled water bottle and a change of clothes."
+    },
+    {
+      "title": "Drop-off & Pick-up",
+      "body": "Drop-off is between 7:00 and 9:00 AM so children can settle into the morning routine; please call ahead if you will arrive later. Pick-up is by 6:00 PM. A late pick-up fee of $1 per minute after 6:00 PM helps cover staff time.\n\nFor safety, only adults on your authorized pick-up list may collect your child, and we ask for a photo ID until our staff know them. You can update authorized adults anytime in the app. Please sign your child in and out each day."
+    },
+    {
+      "title": "Tours & Enrollment",
+      "body": "We love showing families around. Tours are by appointment on Tuesdays and Thursdays at 9:30 AM or 4:00 PM, and last about 30 minutes. Request a tour through the form on our website or by calling (505) 555-0142.\n\nEnrollment is rolling, based on openings by age group; when a room is full we keep a waitlist. To enroll, we will need your child's immunization record, an emergency contact form, and the registration fee and deposit."
+    },
+    {
+      "title": "Communication",
+      "body": "Daily updates, photos, meals, naps, and reminders are shared through the Brightwheel app. Parent-teacher conferences are offered each fall and spring, and you are always welcome to ask for a check-in. For anything urgent during the day, call the front desk at (505) 555-0142."
+    },
+    {
+      "title": "Safety & Emergencies",
+      "body": "Our entrances are secured and every classroom is staffed within state ratios. All teachers are trained in pediatric CPR and first aid, and we run monthly safety drills. In any emergency, staff call 911 first and then contact families. If your child has a known medical condition, please make sure their care plan is on file."
+    }
+  ],
+  "lunchMenu": {
+    "Monday": "Turkey and cheese roll-ups, steamed carrots, apple slices, and milk.",
+    "Tuesday": "Cheese quesadilla with black beans, brown rice, cucumber rounds, and milk.",
+    "Wednesday": "Whole-grain pasta with marinara, roasted zucchini, pear slices, and milk.",
+    "Thursday": "Baked chicken, sweet potato wedges, green peas, and milk.",
+    "Friday": "Veggie and cheese mini-pizzas, garden salad, orange wedges, and milk."
+  },
+  "calendar": [
+    { "date": "2026-06-19", "label": "Juneteenth", "status": "closed" },
+    { "date": "2026-07-03", "label": "Independence Day (observed)", "status": "closed" },
+    { "date": "2026-09-07", "label": "Labor Day", "status": "closed" },
+    { "date": "2026-10-12", "label": "Indigenous Peoples' Day", "status": "open" },
+    { "date": "2026-10-31", "label": "Halloween", "status": "open" },
+    { "date": "2026-11-11", "label": "Veterans Day", "status": "open" },
+    { "date": "2026-11-26", "label": "Thanksgiving", "status": "closed" },
+    { "date": "2026-11-27", "label": "Day after Thanksgiving", "status": "closed" },
+    { "date": "2026-12-24", "label": "Christmas Eve", "status": "closed" },
+    { "date": "2026-12-25", "label": "Christmas Day", "status": "closed" },
+    { "date": "2027-01-01", "label": "New Year's Day", "status": "closed" }
+  ],
+  "faqs": [
+    {
+      "id": "faq-parttime",
+      "question": "Do you offer part-time schedules?",
+      "answer": "Yes. A three-day-per-week schedule is available at 70% of the full-time monthly rate, subject to openings in your child's age group."
+    },
+    {
+      "id": "faq-app",
+      "question": "How will I get updates about my child's day?",
+      "answer": "We share daily photos, meals, naps, and reminders through the Brightwheel app, and offer parent-teacher conferences each fall and spring."
+    },
+    {
+      "id": "faq-sibling",
+      "question": "Is there a sibling discount?",
+      "answer": "Yes, we offer a 10% discount on the younger child's tuition when siblings are enrolled at the same time."
+    }
+  ]
+}

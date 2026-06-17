@@ -1,0 +1,18 @@
+name = "brightwheel-front-desk"
+compatibility_date = "2025-01-15"
+pages_build_output_dir = "./dist"
+
+# D1 binding. The same database is used in local dev (--local) and production.
+[[d1_databases]]
+binding = "DB"
+database_name = "brightwheel-front-desk-db"
+database_id = "62f2f4af-270b-4c3f-8894-7d9eac94957f"
+
+# Workers AI: grounds answers with Llama on the Cloudflare account. No API key.
+[ai]
+binding = "AI"
+
+[vars]
+# Override to any Workers AI text model, e.g. "@cf/meta/llama-3.1-8b-instruct".
+LLM_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+DAILY_QUESTION_CAP = "500"
