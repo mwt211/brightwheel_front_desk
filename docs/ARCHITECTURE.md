@@ -36,9 +36,10 @@ the browser calls `/api/*` with no CORS and no separate backend to operate.
 ## The two surfaces
 
 **Parent chat** (`src/parent/Chat.tsx`). A mobile-first chat. Input by text or
-voice (Web Speech API, `voice.ts`), in English or Spanish. Each answer renders a
-source chip, a confidence dot, and, when needed, an escalation card with a
-one-tap path to a human. Tour and message requests open a small capture sheet.
+voice (Web Speech API, `voice.ts`), in English or Spanish. Each answer renders
+the cited handbook text with its source section, a confidence dot, and, when
+needed, an escalation card with a one-tap path to a human. Tour and message
+requests open a small capture sheet.
 
 **Operator console** (`src/operator/Console.tsx`). Five tabs: an Impact view
 (time saved, answer rate, top topics), the Questions log with filters, Gap Radar

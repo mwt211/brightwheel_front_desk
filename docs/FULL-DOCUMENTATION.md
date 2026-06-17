@@ -169,7 +169,7 @@ Administrators lose hours every day answering the same questions: hours and clos
 
 ## Try it in about 90 seconds
 
-1. On the parent page, tap the starters: "Are you open on Veterans Day?", "What's the tuition for infants?", "I forgot to pack lunch, what's for lunch today?" Note the **source chip** and **confidence dot** on each answer.
+1. On the parent page, tap the starters: "Are you open on Veterans Day?", "What's the tuition for infants?", "I forgot to pack lunch, what's for lunch today?" Note the **cited handbook text**, its **source**, and the **confidence dot** on each answer.
 2. Ask in Spanish ("cuanto cuesta para bebes?"). It answers in Spanish.
 3. Ask "My child has a fever, can they come in?" It never gives medical advice; a safety net shares the policy and routes to a person.
 4. Ask something off-book ("Do you have a swimming pool?"). It says it doesn't have that on file and offers a human, instead of guessing.
@@ -236,7 +236,7 @@ that underpins both. For how they fit together see
 - **Why:** A large share of childcare families speak Spanish. Equitable access is core to brightwheel's mission, and a parent should never have to translate their own question or read a half-translated page.
 
 ### Grounded, cited answers
-- **What:** Every answer is drawn only from the center's handbook and shows the source section as a chip ("Source: Tuition & Fees").
+- **What:** Every answer is drawn only from the center's handbook and shows the cited handbook text with its source section ("Source: Tuition & Fees").
 - **Why:** Trust. The parent can see where the answer came from, and the system cannot invent tuition figures, dates, or policies it was never given.
 
 ### Confidence signal

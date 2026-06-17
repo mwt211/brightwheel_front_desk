@@ -12,7 +12,7 @@ Administrators lose hours every day answering the same questions: hours and clos
 
 ## Try it in about 90 seconds
 
-1. On the parent page, tap the starters: "Are you open on Veterans Day?", "What's the tuition for infants?", "I forgot to pack lunch, what's for lunch today?" Note the **source chip** and **confidence dot** on each answer.
+1. On the parent page, tap the starters: "Are you open on Veterans Day?", "What's the tuition for infants?", "I forgot to pack lunch, what's for lunch today?" Note the **cited handbook text**, its **source**, and the **confidence dot** on each answer.
 2. Ask in Spanish ("cuanto cuesta para bebes?"). It answers in Spanish.
 3. Ask "My child has a fever, can they come in?" It never gives medical advice; a safety net shares the policy and routes to a person.
 4. Ask something off-book ("Do you have a swimming pool?"). It says it doesn't have that on file and offers a human, instead of guessing.

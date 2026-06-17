@@ -7,7 +7,7 @@ A tight walkthrough (about two minutes) for a screen recording or live demo. Two
 
 ## Trustworthy, Grounded Answers (0:15 to 0:45)
 On the parent tab, tap the starters in order:
-- "Are you open on Veterans Day?" Point out the answer plus the "Source: Hours & Closures" chip and the confidence dot.
+- "Are you open on Veterans Day?" Point out the answer plus the quoted handbook text under it, its "Source: Hours & Closures" label, and the confidence dot.
 - "What's the tuition for infants?" Note the exact figure with its citation. "Grounded in the handbook, not guessed."
 - "I forgot to pack lunch. What's for lunch today?" Note it knows today's menu.
 
