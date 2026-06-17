@@ -10,6 +10,10 @@ export interface Env {
   DB: D1Database;
   AI: AiBinding;
   LLM_MODEL?: string;
+  // Groq (primary LLM when set; Workers AI is the fallback).
+  GROQ_API_KEY?: string;
+  GROQ_MODEL?: string;
+  GROQ_VISION_MODEL?: string;
   DAILY_QUESTION_CAP?: string;
   OPERATOR_PASSCODE?: string;
 }

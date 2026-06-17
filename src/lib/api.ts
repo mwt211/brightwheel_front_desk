@@ -104,6 +104,17 @@ export async function fetchHistory(): Promise<
   return data.history ?? [];
 }
 
+export async function ingestHandbookPhotos(
+  images: string[],
+): Promise<{ sections?: { title: string; body: string }[]; error?: string }> {
+  const res = await fetch("/api/ingest", {
+    method: "POST",
+    headers: { "content-type": "application/json", ...opHeaders() },
+    body: JSON.stringify({ images }),
+  });
+  return jsonBody(res);
+}
+
 export async function teach(input: {
   title: string;
   body: string;

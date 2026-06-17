@@ -1,6 +1,10 @@
 # Copy this to .dev.vars (gitignored) for local `wrangler pages dev`.
-# In production these AWS secrets are set with `wrangler pages secret put ...`.
-AWS_ACCESS_KEY_ID = "your-access-key-id"
-AWS_SECRET_ACCESS_KEY = "your-secret-access-key"
+# In production these are set with `wrangler pages secret put <NAME>`.
+
+# Groq powers the LLM (text answers, Gap Radar) and the handbook photo import.
+# Free key from https://console.groq.com. If unset, text falls back to Workers
+# AI automatically, but photo import requires this key.
+GROQ_API_KEY = "your-groq-api-key"
+
 # Optional: gate the operator console. Leave unset to keep it open in the demo.
 # OPERATOR_PASSCODE = "sprouts2026"

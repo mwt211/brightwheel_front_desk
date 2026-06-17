@@ -13,6 +13,7 @@ import {
   fetchKb,
   fetchQuestions,
   fetchRequests,
+  ingestHandbookPhotos,
   saveKb,
   teach,
 } from "../lib/api";
@@ -321,6 +322,36 @@ function KbTab() {
     });
   }
 
+  // Merge photo-extracted sections into the handbook for the operator to review.
+  // Non-destructive: imported sections are always appended, and a title that
+  // already exists is suffixed rather than overwriting the operator's content.
+  function mergeSections(incoming: { title: string; body: string }[]) {
+    // If the raw editor is open with valid edits, merge into those so they are
+    // not lost; otherwise merge into the current structured handbook.
+    let base: CenterKB | null = kb;
+    if (raw) {
+      try {
+        base = JSON.parse(rawText) as CenterKB;
+      } catch {
+        /* keep the structured kb if raw text is mid-edit and invalid */
+      }
+    }
+    if (!base) return;
+    const baseSections = Array.isArray(base.sections) ? base.sections : [];
+    const existing = new Set(baseSections.map((s) => s.title.toLowerCase()));
+    const additions = incoming.map((ns) =>
+      existing.has(ns.title.toLowerCase())
+        ? { title: `${ns.title} (imported)`, body: ns.body }
+        : ns,
+    );
+    const next = { ...base, sections: [...baseSections, ...additions] };
+    setKb(next);
+    if (raw) setRawText(JSON.stringify(next, null, 2));
+    setStatus(
+      `Added ${additions.length} section${additions.length === 1 ? "" : "s"} from your photo. Nothing was overwritten; review below and Save handbook.`,
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -342,6 +373,8 @@ function KbTab() {
           {status}
         </div>
       )}
+
+      <PhotoImport onSections={mergeSections} />
 
       {raw ? (
         <div className="space-y-2">
@@ -494,6 +527,83 @@ function ActivityTab() {
           </p>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ---------- Photo import ("snap a photo of your handbook") ----------
+
+function readAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = () => reject(new Error("Could not read the file."));
+    r.readAsDataURL(file);
+  });
+}
+
+function PhotoImport({
+  onSections,
+}: {
+  onSections: (sections: { title: string; body: string }[]) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const urls = await Promise.all(
+        Array.from(files).slice(0, 4).map(readAsDataUrl),
+      );
+      const res = await ingestHandbookPhotos(urls);
+      if (res.sections && res.sections.length > 0) onSections(res.sections);
+      else setError(res.error ?? "No sections were found in those photos.");
+    } catch {
+      setError("Could not read those photos. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="bg-brand-50 border border-brand-100 rounded-xl p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-brand-800">
+            Import from a photo
+          </p>
+          <p className="text-[11px] text-ink/60">
+            New to the platform? Snap a picture of your paper handbook and we'll
+            draft the sections for you to review.
+          </p>
+        </div>
+        <label
+          className={`shrink-0 text-sm rounded-full px-4 py-2 cursor-pointer ${
+            busy ? "bg-brand-300 text-white" : "bg-brand-700 text-white hover:bg-brand-600"
+          }`}
+        >
+          {busy ? "Reading..." : "Choose photos"}
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            multiple
+            hidden
+            disabled={busy}
+            onChange={(e) => {
+              // Reset the input so the same photo can be re-imported.
+              const input = e.currentTarget;
+              void handleFiles(input.files).finally(() => {
+                input.value = "";
+              });
+            }}
+          />
+        </label>
+      </div>
+      {error && <p className="text-xs text-amber mt-2">{error}</p>}
     </div>
   );
 }
