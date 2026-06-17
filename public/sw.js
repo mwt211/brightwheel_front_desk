@@ -2,7 +2,9 @@
 // installable and usable offline after the first visit: it caches the app
 // shell and static assets, keeps the latest knowledge base for offline answers,
 // and never caches the model endpoint (offline answering is handled in-app).
-const VERSION = "cws-v1";
+// Bump this when the cached shell (index.html, icons, manifest) changes so the
+// activate handler evicts the old cache. Hashed JS/CSS get fresh keys on their own.
+const VERSION = "cws-v2";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -40,7 +42,19 @@ self.addEventListener("fetch", (event) => {
           }
           return res;
         })
-        .catch(() => caches.match("/").then((r) => r || caches.match("/index.html"))),
+        .catch(() =>
+          caches
+            .match("/")
+            .then((r) => r || caches.match("/index.html"))
+            .then(
+              (r) =>
+                r ||
+                new Response("Offline", {
+                  status: 503,
+                  headers: { "content-type": "text/html; charset=utf-8" },
+                }),
+            ),
+        ),
     );
     return;
   }
@@ -56,7 +70,18 @@ self.addEventListener("fetch", (event) => {
           }
           return res;
         })
-        .catch(() => caches.match(req)),
+        .catch(() =>
+          caches
+            .match(req)
+            .then(
+              (r) =>
+                r ||
+                new Response("{}", {
+                  status: 503,
+                  headers: { "content-type": "application/json" },
+                }),
+            ),
+        ),
     );
     return;
   }
@@ -69,13 +94,13 @@ self.addEventListener("fetch", (event) => {
     caches.match(req).then((cached) => {
       const network = fetch(req)
         .then((res) => {
-          if (res && res.status === 200) {
+          if (res && res.ok) {
             const copy = res.clone();
             caches.open(VERSION).then((c) => c.put(req, copy));
           }
           return res;
         })
-        .catch(() => cached);
+        .catch(() => cached || new Response("", { status: 503 }));
       return cached || network;
     }),
   );

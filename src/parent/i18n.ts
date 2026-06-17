@@ -77,6 +77,7 @@ export type Strings = {
   failed: (phone?: string) => string;
   offlineBanner: string;
   offlineTag: string;
+  offlineNoData: string;
   queuedBody: (kind: "tour" | "message") => string;
 };
 
@@ -124,6 +125,8 @@ export const STRINGS: Record<Lang, Strings> = {
       `That didn't go through. Please try again${phone ? `, or call ${phone}` : ""}.`,
     offlineBanner: "Offline. Answering from the saved handbook.",
     offlineTag: "Offline",
+    offlineNoData:
+      "You're offline and this device hasn't saved the center's info yet. Open this page once with a connection and it will work offline after that.",
     queuedBody: (kind) =>
       `You're offline, so your ${kind === "tour" ? "tour request" : "message"} is saved and will send automatically when you're back online.`,
   },
@@ -170,6 +173,8 @@ export const STRINGS: Record<Lang, Strings> = {
       `No se pudo enviar. Inténtelo de nuevo${phone ? ` o llame al ${phone}` : ""}.`,
     offlineBanner: "Sin conexión. Respondiendo desde el manual guardado.",
     offlineTag: "Sin conexión",
+    offlineNoData:
+      "Está sin conexión y este dispositivo aún no ha guardado la información del centro. Abra esta página una vez con conexión y funcionará sin conexión después.",
     queuedBody: (kind) =>
       `Está sin conexión, así que su ${kind === "tour" ? "solicitud de visita" : "mensaje"} se guardó y se enviará automáticamente cuando vuelva a tener conexión.`,
   },

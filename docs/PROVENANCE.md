@@ -79,8 +79,10 @@ Essentially all of the product is original to this prototype:
 | `functions/api/kb.ts`, `requests.ts` | Handbook read/write and the urgency-triaged inbox. Original. |
 | `src/parent/Chat.tsx` | The parent chat UI (citations, confidence, escalation, start-over, voice toggle). Original; the message-thread shape was loosely informed by Sally's chat view but rewritten. |
 | `src/operator/Console.tsx` | The operator console: impact dashboard, log, Gap Radar, inbox, handbook editor, photo import. Original. |
+| `src/parent/offline.ts` | On-device offline answering, the bilingual safety mirror, KB cache, and the request queue. Original. |
+| `public/sw.js` | The service worker, hand-rolled with no PWA build plugin (zero runtime deps). Original. |
 | `seed/center.json` | The fictional Cottonwood Sprouts handbook content. Original. |
-| Product concepts | Gap Radar, the impact dashboard, photo onboarding, and urgent triage are original to this build. |
+| Product concepts | Gap Radar, the impact dashboard, photo onboarding, urgent triage, and offline mode are original to this build. |
 
 ## In one sentence
 

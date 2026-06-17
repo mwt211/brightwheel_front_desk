@@ -57,6 +57,14 @@ that underpins both. For how they fit together see
 - **What:** The parent surface is laid out for a phone first (single column, large tap targets, sticky composer).
 - **Why:** Parents live on their phones, and brightwheel's parent experience is mobile by default.
 
+### Installable, works offline (PWA)
+- **What:** A web manifest and a service worker make the front desk installable to the home screen and load it instantly. After the first visit it works with no connection: the app shell and the center handbook are cached on-device.
+- **Why:** Parents are on the go with spotty signal. The front desk shouldn't be a blank screen in a parking lot or a basement classroom.
+
+### On-device answers when offline
+- **What:** With no network, the assistant answers common questions from the cached handbook by keyword match (hours, tuition, today's lunch computed locally, holidays), each clearly marked "Offline" with its source. The deterministic safety net still runs, so a fever, medication, or emergency question escalates locally rather than getting an offline guess. Tour and message requests left offline are saved and sent automatically on reconnect.
+- **Why:** A parent without signal still gets a useful, honest answer, sensitive questions are still handled safely, and nothing they submit is lost.
+
 ---
 
 ## Operator experience

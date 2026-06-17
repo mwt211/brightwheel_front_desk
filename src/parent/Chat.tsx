@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import type { AnswerPayload, CenterKB, ChatMessage, SuggestedAction } from "../lib/types";
-import { askQuestion, fetchKb, leaveRequest } from "../lib/api";
+import { fetchKb, leaveRequest } from "../lib/api";
 import { createRecognizer, isVoiceInputSupported, type Recognizer } from "./voice";
 import {
-  answerOffline,
+  askWithFallback,
   cacheKb,
   loadCachedKb,
   flushQueue,
+  isOffline,
   queueRequest,
 } from "./offline";
 import {
@@ -109,28 +110,19 @@ export function Chat() {
     setInput("");
     setLoading(true);
     try {
-      let payload: AnswerPayload;
-      const offline = typeof navigator !== "undefined" && !navigator.onLine;
-      if (offline && kbRef.current) {
-        // No connection: answer on-device from the cached handbook.
-        payload = answerOffline(kbRef.current, trimmed, msgLang);
-      } else {
-        try {
-          payload = await askQuestion(trimmed, history);
-        } catch (err) {
-          // Lost the network mid-request: fall back to the offline answer.
-          if (kbRef.current) payload = answerOffline(kbRef.current, trimmed, msgLang);
-          else throw err;
-        }
-      }
+      // Online, with an automatic on-device fallback when there's no network.
+      const payload = await askWithFallback(trimmed, history, kbRef.current, msgLang);
       setMessages((prev) => [
         ...prev,
         { id: uid(), role: "assistant", text: payload.answer, payload },
       ]);
     } catch {
+      const errText = isOffline()
+        ? STRINGS[msgLang].offlineNoData
+        : STRINGS[msgLang].sendError;
       setMessages((prev) => [
         ...prev,
-        { id: uid(), role: "assistant", text: STRINGS[msgLang].sendError },
+        { id: uid(), role: "assistant", text: errText },
       ]);
     } finally {
       setLoading(false);
@@ -534,7 +526,7 @@ function RequestSheet({
       related_question_id: relatedId ?? null,
     };
     // Offline: save it now and send automatically on reconnect.
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
+    if (isOffline()) {
       queueRequest(payload);
       setQueued(true);
       setSent(true);

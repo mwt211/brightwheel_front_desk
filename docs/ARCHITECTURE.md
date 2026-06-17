@@ -127,6 +127,28 @@ breaks. `runVisionJson` uses Groq's multimodal model and requires the key.
 balanced object (optionally requiring a key), and repairs unescaped control
 characters that open models sometimes emit.
 
+## Offline mode and the PWA
+
+The parent surface is an installable PWA that degrades gracefully with no
+network. A web manifest (`public/manifest.webmanifest`) plus a hand-rolled
+service worker (`public/sw.js`, no build dependency) make it installable and
+cache the app shell and the handbook: navigations are network-first with a
+cached-shell fallback, the handbook (`/api/kb`) is network-first and kept for
+offline use, static assets are stale-while-revalidate, and the model endpoint is
+never cached. Every fetch path yields a real `Response` (503 fallbacks), so it
+cannot break the online app.
+
+Answering is centralized in `askWithFallback()` (`src/parent/offline.ts`): online
+it calls `/api/ask`; offline (or if the request fails) it answers on-device via
+`answerOffline()`, which runs the safety screen first, then computes today's
+lunch from the cached menu, then keyword-matches the cached handbook sections and
+FAQs, with a clear fallback. Answers are marked `offline`. The offline safety
+screen is kept byte-for-byte in lockstep with the server's `safety.ts` so a
+health or emergency question escalates locally rather than getting an offline
+guess (a deliberate mirror; see [DECISIONS.md](DECISIONS.md)). Tour and message
+requests made offline are queued in `localStorage` and flushed on the `online`
+event.
+
 ## Data model (Cloudflare D1)
 
 - `kb (id=1, json, version, updated_at)`: the whole handbook as one JSON row,

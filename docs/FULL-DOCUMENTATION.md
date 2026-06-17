@@ -61,6 +61,7 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 - Multilingual: detects and answers in the parent's language (Spanish supported today).
 - Every answer shows its handbook source and a confidence signal.
 - Sensitive or uncovered questions show an escalation card and a one-tap path to a human; tour and message requests are captured.
+- **Works offline (installable PWA):** loads instantly, answers common questions from the cached handbook with no signal (the safety net still runs), and queues tour/message requests until reconnect.
 
 **Operator control center**
 - **Impact dashboard** ("Less admin. More impact."): estimated staff time saved, answer rate, and top topics.
@@ -185,6 +186,7 @@ In childcare a confident wrong answer is worse than no answer, so this is the sp
 - **It teaches itself.** Gap Radar collects the questions the bot could not answer, drafts a handbook entry for each, and the operator approves in one tap. Coverage compounds. Health topics are held back for manual review.
 - **It onboards a center in minutes.** Snap a photo of a paper handbook and a vision model drafts editable sections.
 - **It shows its value.** The operator opens to estimated hours saved and answer rate, the metric a busy owner actually cares about.
+- **It works on the go.** Installable to the home screen, and with no signal it still answers from the cached handbook (the safety net runs offline too) and queues messages until reconnect.
 
 ## Under the hood
 
@@ -262,6 +264,14 @@ that underpins both. For how they fit together see
 ### Mobile-first design
 - **What:** The parent surface is laid out for a phone first (single column, large tap targets, sticky composer).
 - **Why:** Parents live on their phones, and brightwheel's parent experience is mobile by default.
+
+### Installable, works offline (PWA)
+- **What:** A web manifest and a service worker make the front desk installable to the home screen and load it instantly. After the first visit it works with no connection: the app shell and the center handbook are cached on-device.
+- **Why:** Parents are on the go with spotty signal. The front desk shouldn't be a blank screen in a parking lot or a basement classroom.
+
+### On-device answers when offline
+- **What:** With no network, the assistant answers common questions from the cached handbook by keyword match (hours, tuition, today's lunch computed locally, holidays), each clearly marked "Offline" with its source. The deterministic safety net still runs, so a fever, medication, or emergency question escalates locally rather than getting an offline guess. Tour and message requests left offline are saved and sent automatically on reconnect.
+- **Why:** A parent without signal still gets a useful, honest answer, sensitive questions are still handled safely, and nothing they submit is lost.
 
 ---
 
@@ -478,6 +488,28 @@ breaks. `runVisionJson` uses Groq's multimodal model and requires the key.
 balanced object (optionally requiring a key), and repairs unescaped control
 characters that open models sometimes emit.
 
+## Offline mode and the PWA
+
+The parent surface is an installable PWA that degrades gracefully with no
+network. A web manifest (`public/manifest.webmanifest`) plus a hand-rolled
+service worker (`public/sw.js`, no build dependency) make it installable and
+cache the app shell and the handbook: navigations are network-first with a
+cached-shell fallback, the handbook (`/api/kb`) is network-first and kept for
+offline use, static assets are stale-while-revalidate, and the model endpoint is
+never cached. Every fetch path yields a real `Response` (503 fallbacks), so it
+cannot break the online app.
+
+Answering is centralized in `askWithFallback()` (`src/parent/offline.ts`): online
+it calls `/api/ask`; offline (or if the request fails) it answers on-device via
+`answerOffline()`, which runs the safety screen first, then computes today's
+lunch from the cached menu, then keyword-matches the cached handbook sections and
+FAQs, with a clear fallback. Answers are marked `offline`. The offline safety
+screen is kept byte-for-byte in lockstep with the server's `safety.ts` so a
+health or emergency question escalates locally rather than getting an offline
+guess (a deliberate mirror; see [DECISIONS.md](DECISIONS.md)). Tour and message
+requests made offline are queued in `localStorage` and flushed on the `online`
+event.
+
 ## Data model (Cloudflare D1)
 
 - `kb (id=1, json, version, updated_at)`: the whole handbook as one JSON row,
@@ -650,6 +682,10 @@ The "why" behind the build, the tradeoffs taken, and how it maps to brightwheel.
 
 **Photo handbook import is onboarding, not magic.** The fastest way to make a real center valuable on day one is to ingest the handbook they already have on paper. A vision model OCRs the photos into structured sections, but the model never writes directly to the source of truth: the operator reviews every drafted section, the merge is non-destructive (append, never overwrite), and review is the explicit mitigation for any text injected into a photo.
 
+**Offline is honest degradation, not a fake AI.** The model is remote, so there is no real offline LLM. Instead of pretending, offline mode caches the handbook and answers common questions on-device by keyword match, clearly marked offline, and queues any requests for reconnect. The one non-negotiable: the safety net runs offline too, so a health or emergency question never gets an on-device medical guess. We hand-rolled the service worker rather than add a PWA build plugin, to keep the runtime dependency footprint at zero (React only).
+
+**The offline safety net mirrors the server, on purpose.** The client safety patterns are kept byte-for-byte identical to `functions/_shared/safety.ts`. A shared module across the Vite and Workers build contexts would risk the Pages Functions bundle, so the mirror is documented and verified by the review passes instead. If the patterns grow, a shared pure-pattern module is the next step.
+
 **Cloudflare end to end.** Pages, Functions, D1, and Workers AI on one platform means the demo is free, persists across devices, and keeps the fallback path keyless, which is what makes the operator-edits-then-parent-sees-it loop feel real rather than staged.
 
 **Open operator console for the demo.** Operator routes are open by default so a reviewer can explore both sides immediately. `OPERATOR_PASSCODE` gates them when set; a real deployment would fail closed. This is a deliberate demo tradeoff, not an oversight.
@@ -756,8 +792,10 @@ Essentially all of the product is original to this prototype:
 | `functions/api/kb.ts`, `requests.ts` | Handbook read/write and the urgency-triaged inbox. Original. |
 | `src/parent/Chat.tsx` | The parent chat UI (citations, confidence, escalation, start-over, voice toggle). Original; the message-thread shape was loosely informed by Sally's chat view but rewritten. |
 | `src/operator/Console.tsx` | The operator console: impact dashboard, log, Gap Radar, inbox, handbook editor, photo import. Original. |
+| `src/parent/offline.ts` | On-device offline answering, the bilingual safety mirror, KB cache, and the request queue. Original. |
+| `public/sw.js` | The service worker, hand-rolled with no PWA build plugin (zero runtime deps). Original. |
 | `seed/center.json` | The fictional Cottonwood Sprouts handbook content. Original. |
-| Product concepts | Gap Radar, the impact dashboard, photo onboarding, and urgent triage are original to this build. |
+| Product concepts | Gap Radar, the impact dashboard, photo onboarding, urgent triage, and offline mode are original to this build. |
 
 ## In one sentence
 
@@ -829,6 +867,7 @@ On the parent tab, tap the starters in order:
 - Type a question in Spanish, for example "cuanto cuesta para bebes?" The whole page switches to Spanish and the answer is cited. "It meets families in their language."
 - Ask "My child has a fever, can they come in?" (or the Spanish equivalent). "This never gives medical advice. A deterministic safety net, in both languages, catches it before the model, shares the policy, and routes to a person."
 - Ask "Do you have a swimming pool?" "Not in the handbook, so it does not bluff. It says so, offers a human, and logs this as a gap."
+- (Optional, on the go) Switch on airplane mode or DevTools "Offline," then ask "what are your hours?" It answers from the saved handbook, marked Offline, and a fever question still escalates locally. Leave a message and it queues until reconnect.
 
 ## The Operator Side and the Loop (1:05 to 1:45)
 Switch to the operator tab:

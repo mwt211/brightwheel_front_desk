@@ -31,7 +31,7 @@ type Kb = {
 };
 
 const EMERGENCY =
-  /\b(not breathing|can'?t breathe|trouble breathing|difficulty breathing|struggling to breathe|choking|unconscious|passed out|fainted|won'?t wake|unresponsive|not moving|lethargic|seizure|seizing|anaphyla|allergic reaction|epipen|turning blue|blue lips|lips are blue|severe bleeding|bleeding badly|won'?t stop bleeding|head injury|hit (his|her|their) head|broke (his|her|their)|broken bone|swallowed|ingested|poison|drowning|ambulance|call 911|911|overdose|no respira|no puede respirar|inconsciente|se desmay|desmay|atragant|convulsi|reacci[oó]n al[eé]rgica|sangrando|envenen|emergencia|ambulancia|se trag[oó])/i;
+  /\b(not breathing|can'?t breathe|trouble breathing|difficulty breathing|struggling to breathe|choking|unconscious|passed out|fainted|won'?t wake|unresponsive|not moving|lethargic|seizure|seizing|anaphyla|allergic reaction|epipen|turning blue|blue lips|lips are blue|bleed|severe bleeding|bleeding badly|won'?t stop bleeding|head injury|hit (his|her|their) head|broke (his|her|their)|broken bone|swallowed|ingested|poison|drowning|ambulance|call 911|911|overdose|no respira|no puede respirar|inconsciente|se desmay|desmay|atragant|convulsi|reacci[oó]n al[eé]rgica|sangr|envenen|emergencia|ambulancia|se trag[oó])/i;
 
 const MEDICATION =
   /\b(dose|dosage|\d+\s?(mg|ml)\b|prescri|(how much|give|take|can i give|should i give|is it (ok|safe)|can (he|she|they) (take|have)|should (he|she|they) (take|have))[^.?!]{0,25}(medicine|medication|tylenol|advil|ibuprofen|acetaminophen|benadryl|motrin)|medicina|medicamento|dosis|jarabe|puedo darle|deberia darle|cu[aá]nto.{0,15}(medic|le doy))/i;

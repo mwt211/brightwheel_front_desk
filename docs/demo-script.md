@@ -15,6 +15,7 @@ On the parent tab, tap the starters in order:
 - Type a question in Spanish, for example "cuanto cuesta para bebes?" The whole page switches to Spanish and the answer is cited. "It meets families in their language."
 - Ask "My child has a fever, can they come in?" (or the Spanish equivalent). "This never gives medical advice. A deterministic safety net, in both languages, catches it before the model, shares the policy, and routes to a person."
 - Ask "Do you have a swimming pool?" "Not in the handbook, so it does not bluff. It says so, offers a human, and logs this as a gap."
+- (Optional, on the go) Switch on airplane mode or DevTools "Offline," then ask "what are your hours?" It answers from the saved handbook, marked Offline, and a fever question still escalates locally. Leave a message and it queues until reconnect.
 
 ## The Operator Side and the Loop (1:05 to 1:45)
 Switch to the operator tab:

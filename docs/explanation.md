@@ -31,6 +31,7 @@ In childcare a confident wrong answer is worse than no answer, so this is the sp
 - **It teaches itself.** Gap Radar collects the questions the bot could not answer, drafts a handbook entry for each, and the operator approves in one tap. Coverage compounds. Health topics are held back for manual review.
 - **It onboards a center in minutes.** Snap a photo of a paper handbook and a vision model drafts editable sections.
 - **It shows its value.** The operator opens to estimated hours saved and answer rate, the metric a busy owner actually cares about.
+- **It works on the go.** Installable to the home screen, and with no signal it still answers from the cached handbook (the safety net runs offline too) and queues messages until reconnect.
 
 ## Under the hood
 

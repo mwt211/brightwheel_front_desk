@@ -24,6 +24,10 @@ The "why" behind the build, the tradeoffs taken, and how it maps to brightwheel.
 
 **Photo handbook import is onboarding, not magic.** The fastest way to make a real center valuable on day one is to ingest the handbook they already have on paper. A vision model OCRs the photos into structured sections, but the model never writes directly to the source of truth: the operator reviews every drafted section, the merge is non-destructive (append, never overwrite), and review is the explicit mitigation for any text injected into a photo.
 
+**Offline is honest degradation, not a fake AI.** The model is remote, so there is no real offline LLM. Instead of pretending, offline mode caches the handbook and answers common questions on-device by keyword match, clearly marked offline, and queues any requests for reconnect. The one non-negotiable: the safety net runs offline too, so a health or emergency question never gets an on-device medical guess. We hand-rolled the service worker rather than add a PWA build plugin, to keep the runtime dependency footprint at zero (React only).
+
+**The offline safety net mirrors the server, on purpose.** The client safety patterns are kept byte-for-byte identical to `functions/_shared/safety.ts`. A shared module across the Vite and Workers build contexts would risk the Pages Functions bundle, so the mirror is documented and verified by the review passes instead. If the patterns grow, a shared pure-pattern module is the next step.
+
 **Cloudflare end to end.** Pages, Functions, D1, and Workers AI on one platform means the demo is free, persists across devices, and keeps the fallback path keyless, which is what makes the operator-edits-then-parent-sees-it loop feel real rather than staged.
 
 **Open operator console for the demo.** Operator routes are open by default so a reviewer can explore both sides immediately. `OPERATOR_PASSCODE` gates them when set; a real deployment would fail closed. This is a deliberate demo tradeoff, not an oversight.

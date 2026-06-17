@@ -37,6 +37,7 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 - Multilingual: detects and answers in the parent's language (Spanish supported today).
 - Every answer shows its handbook source and a confidence signal.
 - Sensitive or uncovered questions show an escalation card and a one-tap path to a human; tour and message requests are captured.
+- **Works offline (installable PWA):** loads instantly, answers common questions from the cached handbook with no signal (the safety net still runs), and queues tour/message requests until reconnect.
 
 **Operator control center**
 - **Impact dashboard** ("Less admin. More impact."): estimated staff time saved, answer rate, and top topics.
