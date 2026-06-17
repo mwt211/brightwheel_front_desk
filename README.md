@@ -21,6 +21,7 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 | Doc | What it covers |
 | --- | --- |
 | [docs/explanation.md](docs/explanation.md) | The one-page summary to send with the live link. |
+| [docs/FEATURES.md](docs/FEATURES.md) | Every feature, with the what and the why. |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Full system walkthrough and request lifecycle. |
 | [docs/API.md](docs/API.md) | Endpoint reference. |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Rationale, tradeoffs, brightwheel alignment, roadmap. |
