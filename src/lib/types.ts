@@ -52,8 +52,6 @@ export type FaqEntry = {
   id: string;
   question: string;
   answer: string;
-  /** Set when this entry was taught via Gap Radar, for the audit trail. */
-  taughtAt?: string;
 };
 
 export type CenterKB = {

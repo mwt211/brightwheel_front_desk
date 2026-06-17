@@ -17,6 +17,11 @@ function uid(): string {
     : String(Math.random());
 }
 
+const telHref = (value: string) => `tel:${value.replace(/[^0-9+]/g, "")}`;
+
+const actionable = (actions?: SuggestedAction[]) =>
+  actions?.filter((a) => a.action !== "none") ?? [];
+
 export function Chat() {
   const [center, setCenter] = useState<{
     name: string;
@@ -114,7 +119,7 @@ export function Chat() {
           </div>
           {center?.phone && (
             <a
-              href={`tel:${center.phone.replace(/[^0-9+]/g, "")}`}
+              href={telHref(center.phone)}
               className="text-xs bg-brand-600 hover:bg-brand-500 rounded-full px-3 py-1.5 transition"
             >
               Call us
@@ -165,7 +170,7 @@ export function Chat() {
 
   function handleAction(a: SuggestedAction, relatedId?: number) {
     if (a.action === "call" && a.value) {
-      window.location.href = `tel:${a.value.replace(/[^0-9+]/g, "")}`;
+      window.location.href = telHref(a.value);
     } else if (a.action === "schedule_tour") {
       setRequestModal({ kind: "tour", relatedId });
     } else if (a.action === "message_front_desk") {
@@ -255,12 +260,10 @@ function AssistantBubble({
         )}
 
         {!escalate &&
-          payload?.suggested_actions
-            ?.filter((a) => a.action !== "none")
-            .map((a, i) => (
+          actionable(payload?.suggested_actions).map((a, i) => (
               <button
                 key={i}
-                onClick={() => onAction(a, payload.question_id)}
+                onClick={() => onAction(a, payload?.question_id)}
                 className="text-xs bg-amber/10 text-amber border border-amber/30 hover:bg-amber/20 rounded-full px-3 py-1 transition mr-1.5"
               >
                 {a.label}
@@ -299,14 +302,13 @@ function EscalationCard({
         A team member should help with this.
       </p>
       <div className="flex flex-wrap gap-1.5">
-        {(payload.suggested_actions?.filter((a) => a.action !== "none") ?? []).map(
-          (a, i) => (
-            <button
-              key={i}
-              onClick={() => onAction(a, payload.question_id)}
-              className="text-xs bg-brand-600 text-white hover:bg-brand-500 rounded-full px-3 py-1.5 transition"
-            >
-              {a.label}
+        {actionable(payload.suggested_actions).map((a, i) => (
+          <button
+            key={i}
+            onClick={() => onAction(a, payload.question_id)}
+            className="text-xs bg-brand-600 text-white hover:bg-brand-500 rounded-full px-3 py-1.5 transition"
+          >
+            {a.label}
             </button>
           ),
         )}
