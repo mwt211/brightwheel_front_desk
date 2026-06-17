@@ -41,6 +41,10 @@ that underpins both. For how they fit together see
 - **What:** When a question is sensitive or not covered, the answer shows an escalation card ("A team member should help with this") with one-tap actions to call or message the front desk.
 - **Why:** A confident wrong answer is worse than no answer. Escalating, rather than bluffing, protects the family and the center and reassures an anxious parent that a human is available.
 
+### Helpful feedback with one-tap connect
+- **What:** On answers the assistant thinks it handled, a quiet "Was this helpful?" row offers a thumb up or down. A thumbs down routes the parent straight to a person (the message sheet) and flags the answer for the operator: it shows as "Marked unhelpful" in the log and is folded into Gap Radar.
+- **Why:** Confidence alone cannot catch an answer that is wrong but sounds sure. A one-tap "no" gives the parent a frictionless exit and gives the operator the one signal the system otherwise cannot see, so the loop improves on felt quality, not just self-rated confidence.
+
 ### Tour and message capture
 - **What:** Suggested actions open a short sheet to request a tour or leave a message; the request is saved for staff, with a clear success or failure state.
 - **Why:** It turns intent into a captured lead or message even when no one is at the desk, so the front desk works after hours and nothing falls through the cracks.
@@ -82,8 +86,8 @@ that underpins both. For how they fit together see
 - **Why:** It gives the operator visibility into what families actually ask and where the assistant struggled, which is the raw material for improving it.
 
 ### Gap Radar (self-teaching loop)
-- **What:** On demand, it gathers the questions the assistant could not confidently answer, clusters them into themes, and drafts a handbook section for each.
-- **Why:** A static FAQ bot decays. Gap Radar converts the gaps parents hit into proposed coverage, so the system gets better every day instead of going stale.
+- **What:** On demand, it gathers the questions the assistant could not confidently answer (low confidence, escalated, or explicitly marked unhelpful by a parent), clusters them into themes, and drafts a handbook section for each.
+- **Why:** A static FAQ bot decays. Gap Radar converts the gaps parents hit into proposed coverage, so the system gets better every day instead of going stale. Pulling in unhelpful-flagged answers means even a confident miss surfaces for fixing.
 
 ### One-tap teach
 - **What:** The operator approves a drafted section and it is appended to the handbook immediately, so the parent assistant can answer that question from then on.
@@ -100,6 +104,10 @@ that underpins both. For how they fit together see
 ### Urgent-message triage
 - **What:** The inbox of tour requests and messages flags time-sensitive ones (words like fever, sick, hurt, emergency, "today," "asap," and Spanish equivalents such as fiebre, enfermo, hoy) and floats them to the top.
 - **Why:** A stretched operator should see what needs action now first, so a parent with an urgent need is not buried under routine requests.
+
+### Inbox quick actions
+- **What:** Each inbox item has a one-tap call or email (built from the contact) and a "Mark handled" toggle. Handled items are badged, dimmed, and sink below open ones; urgent-open items still float to the top.
+- **Why:** The inbox should be a worklist, not just a list. The operator acts in one tap and always sees what still needs attention first.
 
 ### Handbook editor with optimistic concurrency
 - **What:** The handbook is editable in place (center details and sections) and via a raw-JSON mode; saves are version-checked and reject a stale write with a clear conflict message.

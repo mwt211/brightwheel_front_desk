@@ -52,6 +52,19 @@ export async function fetchChildren(): Promise<Child[]> {
   return data.children ?? [];
 }
 
+export async function sendFeedback(
+  questionId: number,
+  helpful: boolean,
+): Promise<void> {
+  await fetch("/api/feedback", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ question_id: questionId, helpful }),
+  }).catch(() => {
+    /* feedback is best-effort; never block the parent on it */
+  });
+}
+
 export async function fetchKb(): Promise<{ kb: CenterKB; version: number }> {
   return jsonOrThrow(await fetch("/api/kb"));
 }
@@ -88,6 +101,18 @@ export async function fetchRequests(): Promise<RequestEntry[]> {
     await fetch("/api/requests", { headers: opHeaders() }),
   );
   return data.requests ?? [];
+}
+
+export async function setRequestHandled(
+  id: number,
+  handled: boolean,
+): Promise<{ ok?: boolean; error?: string }> {
+  const res = await fetch("/api/requests", {
+    method: "PATCH",
+    headers: { "content-type": "application/json", ...opHeaders() },
+    body: JSON.stringify({ id, handled }),
+  });
+  return jsonBody(res);
 }
 
 export async function fetchQuestions(): Promise<QuestionLogEntry[]> {

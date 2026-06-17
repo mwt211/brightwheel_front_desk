@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { AnswerPayload, CenterKB, Child, ChatMessage, SuggestedAction } from "../lib/types";
-import { fetchKb, fetchChildren, leaveRequest } from "../lib/api";
+import { fetchKb, fetchChildren, leaveRequest, sendFeedback } from "../lib/api";
 import { createRecognizer, isVoiceInputSupported, type Recognizer } from "./voice";
 import {
   askWithFallback,
@@ -429,7 +429,75 @@ function AssistantBubble({
               {a.label}
             </button>
           ))}
+
+        {/* On answers the assistant thinks it handled, ask if it actually
+            helped. A "no" is the one signal confidence can't give us; it routes
+            the parent to a person and flags the answer for the operator. */}
+        {!escalate &&
+          payload?.question_id &&
+          !payload.offline &&
+          !payload.safety_intercept && (
+            <HelpfulRow
+              lang={lang}
+              questionId={payload.question_id}
+              onConnect={() =>
+                onAction({ action: "message_front_desk", label: "" }, payload.question_id)
+              }
+            />
+          )}
       </div>
+    </div>
+  );
+}
+
+function HelpfulRow({
+  lang,
+  questionId,
+  onConnect,
+}: {
+  lang: Lang;
+  questionId: number;
+  onConnect: () => void;
+}) {
+  const s = STRINGS[lang];
+  const [state, setState] = useState<"idle" | "up" | "down">("idle");
+
+  if (state === "up") {
+    return <p className="text-[11px] text-ink/45 pl-1">{s.feedbackThanks}</p>;
+  }
+  if (state === "down") {
+    return (
+      <button
+        onClick={onConnect}
+        className="text-xs bg-brand-600 text-white hover:bg-brand-500 rounded-full px-3 py-1.5 transition"
+      >
+        {s.connectHuman}
+      </button>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2 text-[11px] text-ink/50 pl-1">
+      <span>{s.wasHelpful}</span>
+      <button
+        aria-label={s.helpfulYes}
+        onClick={() => {
+          setState("up");
+          sendFeedback(questionId, true);
+        }}
+        className="text-ink/40 hover:text-brand-600 transition"
+      >
+        <ThumbIcon />
+      </button>
+      <button
+        aria-label={s.helpfulNo}
+        onClick={() => {
+          setState("down");
+          sendFeedback(questionId, false);
+        }}
+        className="text-ink/40 hover:text-amber transition"
+      >
+        <ThumbIcon down />
+      </button>
     </div>
   );
 }
@@ -693,6 +761,25 @@ function BackIcon() {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="19" y1="12" x2="5" y2="12" />
       <polyline points="12 19 5 12 12 5" />
+    </svg>
+  );
+}
+
+function ThumbIcon({ down = false }: { down?: boolean }) {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={down ? { transform: "rotate(180deg)" } : undefined}
+    >
+      <path d="M7 10v12" />
+      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
     </svg>
   );
 }

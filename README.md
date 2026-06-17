@@ -41,6 +41,7 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 - Every answer shows the cited handbook text and a confidence signal.
 - **Answers about your child's day:** view as a parent and ask about naps, meals, check-in, or your account; the answer comes from that family's record, cited as "[child]'s day". Demo data is fictional; real access is per-parent and authenticated.
 - Sensitive or uncovered questions show an escalation card and a one-tap path to a human; tour and message requests are captured.
+- A quiet "Was this helpful?" on each answer: a thumbs down connects the parent to a person and flags the answer for the operator (and Gap Radar).
 - **Works offline (installable PWA):** loads instantly, answers common questions from the cached handbook with no signal (the safety net still runs), and queues tour/message requests until reconnect.
 
 **Operator control center**
@@ -48,7 +49,7 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 - **Question log** with answered / escalated / gap counts and filters.
 - **Gap Radar**: clusters the questions the bot could not answer, drafts a handbook entry for each, and lets the operator approve it in one tap. Health topics are flagged review-only and never auto-taught.
 - **Snap a photo of your handbook**: upload photos of a paper handbook and a vision model drafts editable sections to review into the knowledge base.
-- **Inbox** with urgent messages triaged to the top.
+- **Inbox** with urgent messages triaged to the top, plus one-tap call/email and a mark-handled toggle.
 - **Handbook editor** (the single source of truth) with optimistic-locked saves, plus an activity trail.
 
 ## How it earns trust

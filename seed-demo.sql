@@ -17,7 +17,8 @@ CREATE TABLE requests (
   contact             TEXT    NOT NULL DEFAULT '',
   message             TEXT    NOT NULL DEFAULT '',
   related_question_id INTEGER,
-  urgent              INTEGER NOT NULL DEFAULT 0
+  urgent              INTEGER NOT NULL DEFAULT 0,
+  handled             INTEGER NOT NULL DEFAULT 0
 );
 
 INSERT INTO questions (created_at, text, answer, confidence, category, status, needs_human, escalation_reason, citations) VALUES

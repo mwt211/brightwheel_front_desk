@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS questions (
   status           TEXT    NOT NULL DEFAULT 'answered',
   needs_human      INTEGER NOT NULL DEFAULT 0,
   escalation_reason TEXT,
-  citations        TEXT    NOT NULL DEFAULT '[]'
+  citations        TEXT    NOT NULL DEFAULT '[]',
+  feedback         TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_questions_created ON questions (created_at DESC);
@@ -33,7 +34,8 @@ CREATE TABLE IF NOT EXISTS requests (
   contact             TEXT    NOT NULL DEFAULT '',
   message             TEXT    NOT NULL DEFAULT '',
   related_question_id INTEGER,
-  urgent              INTEGER NOT NULL DEFAULT 0
+  urgent              INTEGER NOT NULL DEFAULT 0,
+  handled             INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS kb_history (

@@ -76,6 +76,11 @@ export type Strings = {
   source: string;
   trust: { high: string; medium: string; low: string };
   fromRecord: string;
+  wasHelpful: string;
+  helpfulYes: string;
+  helpfulNo: string;
+  feedbackThanks: string;
+  connectHuman: string;
   escalateTitle: string;
   placeholder: string;
   listening: string;
@@ -124,6 +129,11 @@ export const STRINGS: Record<Lang, Strings> = {
       low: "Not in our handbook",
     },
     fromRecord: "From your child's record",
+    wasHelpful: "Was this helpful?",
+    helpfulYes: "Yes, this helped",
+    helpfulNo: "No, this didn't help",
+    feedbackThanks: "Thanks for the feedback.",
+    connectHuman: "Connect me to a person",
     escalateTitle: "A team member should help with this.",
     placeholder: "Ask the front desk...",
     listening: "Listening...",
@@ -178,6 +188,11 @@ export const STRINGS: Record<Lang, Strings> = {
       low: "No está en nuestro manual",
     },
     fromRecord: "Del registro de su hijo",
+    wasHelpful: "¿Le sirvió esta respuesta?",
+    helpfulYes: "Sí, me sirvió",
+    helpfulNo: "No, no me sirvió",
+    feedbackThanks: "Gracias por su comentario.",
+    connectHuman: "Comuníqueme con una persona",
     escalateTitle: "Un miembro del equipo debería ayudar con esto.",
     placeholder: "Pregúntale a la recepción...",
     listening: "Escuchando...",

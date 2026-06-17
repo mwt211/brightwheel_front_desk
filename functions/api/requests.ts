@@ -1,4 +1,11 @@
-import { type Env, addRequest, listRequests, json, operatorGate } from "../_shared/db";
+import {
+  type Env,
+  addRequest,
+  listRequests,
+  setRequestHandled,
+  json,
+  operatorGate,
+} from "../_shared/db";
 
 // Deterministic urgency flag so time-sensitive messages float to the top of the
 // operator inbox (bilingual, like the safety net).
@@ -41,4 +48,22 @@ export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
   if (blocked) return blocked;
   const requests = await listRequests(env.DB);
   return json({ requests });
+};
+
+// Operator marks an inbox item handled (or reopens it).
+export const onRequestPatch: PagesFunction<Env> = async ({ env, request }) => {
+  const blocked = operatorGate(env, request);
+  if (blocked) return blocked;
+  let body: { id?: number; handled?: boolean };
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "Invalid JSON body." }, 400);
+  }
+  const id = Number(body.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return json({ error: "Missing request id." }, 400);
+  }
+  await setRequestHandled(env.DB, id, body.handled !== false);
+  return json({ ok: true });
 };

@@ -97,9 +97,10 @@ answer is worse than no answer.
 ## The self-teaching loop (Gap Radar)
 
 `GET /api/questions?view=gaps` pulls the questions the bot flagged as gaps or
-handed to a human (`status in (unanswered, escalated) or confidence = low`, which
-also sweeps in safety escalations), sends them to the model, and gets back
-clustered themes, each with a drafted handbook section.
+handed to a human (`status in (unanswered, escalated) or confidence = low or
+feedback = 'unhelpful'`, which sweeps in safety escalations and any answer a
+parent thumbed down), sends them to the model, and gets back clustered themes,
+each with a drafted handbook section.
 Health and safety themes are flagged `reviewOnly` and never auto-published as
 policy. The operator edits if they like and approves in one tap
 (`POST /api/questions`), which appends the section to the handbook and bumps its

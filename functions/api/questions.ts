@@ -61,10 +61,13 @@ export const onRequestGet: PagesFunction<Env> = async ({ env, request }) => {
 };
 
 async function computeGaps(env: Env) {
-  // Pull recent questions the bot struggled with.
+  // Pull recent questions the bot struggled with: low confidence, escalated, or
+  // gaps, plus answers a parent explicitly marked unhelpful (the signal the
+  // confidence score can't give us, so a confident miss still surfaces here).
   const { results } = await env.DB.prepare(
     `SELECT text, category, confidence, status FROM questions
      WHERE status IN ('unanswered','escalated') OR confidence = 'low'
+        OR feedback = 'unhelpful'
      ORDER BY created_at DESC LIMIT 40`,
   ).all<{ text: string; category: string; confidence: string; status: string }>();
 

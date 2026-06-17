@@ -93,6 +93,8 @@ export type QuestionLogEntry = {
   needs_human: boolean;
   escalation_reason: string | null;
   citations: Citation[];
+  /** Parent "was this helpful?" verdict, when given. */
+  feedback?: "helpful" | "unhelpful" | null;
 };
 
 export type RequestEntry = {
@@ -104,6 +106,7 @@ export type RequestEntry = {
   message: string;
   related_question_id: number | null;
   urgent: boolean;
+  handled: boolean;
 };
 
 export type GapCluster = {

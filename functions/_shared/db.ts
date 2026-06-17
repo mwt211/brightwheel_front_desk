@@ -106,7 +106,7 @@ export async function logQuestion(
 export async function listQuestions(db: D1Database, limit = 200) {
   const { results } = await db
     .prepare(
-      `SELECT id, created_at, text, answer, confidence, category, status, needs_human, escalation_reason, citations
+      `SELECT id, created_at, text, answer, confidence, category, status, needs_human, escalation_reason, citations, feedback
        FROM questions ORDER BY created_at DESC LIMIT ?`,
     )
     .bind(limit)
@@ -116,6 +116,18 @@ export async function listQuestions(db: D1Database, limit = 200) {
     needs_human: Boolean(r.needs_human),
     citations: safeParse(r.citations as string, []),
   }));
+}
+
+/** Record a parent's "was this helpful?" on a logged answer. */
+export async function setFeedback(
+  db: D1Database,
+  id: number,
+  helpful: boolean,
+): Promise<void> {
+  await db
+    .prepare("UPDATE questions SET feedback = ? WHERE id = ?")
+    .bind(helpful ? "helpful" : "unhelpful", id)
+    .run();
 }
 
 export async function addRequest(
@@ -148,12 +160,31 @@ export async function addRequest(
 }
 
 export async function listRequests(db: D1Database, limit = 100) {
-  // Urgent items float to the top so a busy operator sees them first.
+  // Open items first, urgent within those, so a busy operator sees what still
+  // needs action at the top; handled items sink to the bottom.
   const { results } = await db
-    .prepare("SELECT * FROM requests ORDER BY urgent DESC, created_at DESC LIMIT ?")
+    .prepare(
+      "SELECT * FROM requests ORDER BY handled ASC, urgent DESC, created_at DESC LIMIT ?",
+    )
     .bind(limit)
     .all();
-  return (results ?? []).map((r) => ({ ...r, urgent: Boolean(r.urgent) }));
+  return (results ?? []).map((r) => ({
+    ...r,
+    urgent: Boolean(r.urgent),
+    handled: Boolean(r.handled),
+  }));
+}
+
+/** Mark an inbox request handled (or reopen it). */
+export async function setRequestHandled(
+  db: D1Database,
+  id: number,
+  handled: boolean,
+): Promise<void> {
+  await db
+    .prepare("UPDATE requests SET handled = ? WHERE id = ?")
+    .bind(handled ? 1 : 0, id)
+    .run();
 }
 
 export async function addHistory(db: D1Database, summary: string) {

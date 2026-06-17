@@ -76,14 +76,28 @@ Teach the bot one section (Gap Radar approval):
 ```
 Appends or replaces by title, bumps the handbook version, logs to history.
 
-## POST /api/requests  (public) · GET /api/requests  (operator)
+## POST /api/feedback  (public)
+
+A parent marks an answer helpful or not:
+```json
+{ "question_id": 42, "helpful": false }
+```
+Returns `{ ok: true }`. A `false` writes `feedback = "unhelpful"` on the logged
+question, which surfaces it in the operator log and folds it into Gap Radar (so
+a confidently-wrong answer still becomes a teachable gap).
+
+## POST /api/requests  (public) · GET /api/requests  (operator) · PATCH /api/requests  (operator)
 
 `POST` captures a tour request or message; urgency is flagged deterministically:
 ```json
 { "kind": "tour" | "message", "name": "...", "contact": "...",
   "message": "...", "related_question_id": 42 }
 ```
-`GET` returns `{ requests: [...] }` with urgent items first.
+`GET` returns `{ requests: [...] }` with open items first, urgent within those,
+and handled items last. `PATCH` marks an item handled or reopens it:
+```json
+{ "id": 7, "handled": true }
+```
 
 ## POST /api/ingest  (operator)
 

@@ -15,8 +15,13 @@ import {
   fetchRequests,
   ingestHandbookPhotos,
   saveKb,
+  setRequestHandled,
   teach,
 } from "../lib/api";
+
+const isEmail = (c: string) => c.includes("@");
+const contactHref = (c: string) =>
+  isEmail(c) ? `mailto:${c.trim()}` : `tel:${c.replace(/[^0-9+]/g, "")}`;
 
 type Tab = "questions" | "gaps" | "kb" | "inbox" | "activity";
 
@@ -132,6 +137,11 @@ function QuestionsTab() {
             <div className="flex items-center gap-2 mt-2">
               <ConfidenceBadge confidence={q.confidence} />
               <span className="text-[11px] text-ink/40">{q.category}</span>
+              {q.feedback === "unhelpful" && (
+                <span className="text-[11px] bg-amber/15 text-amber border border-amber/30 rounded-full px-2 py-0.5">
+                  Marked unhelpful
+                </span>
+              )}
               <span className="text-[11px] text-ink/40 ml-auto">
                 {new Date(q.created_at).toLocaleString()}
               </span>
@@ -472,6 +482,17 @@ function InboxTab() {
   useEffect(() => {
     fetchRequests().then(setItems).catch(() => setItems([]));
   }, []);
+
+  async function toggleHandled(r: RequestEntry) {
+    const next = !r.handled;
+    setItems((prev) => prev?.map((x) => (x.id === r.id ? { ...x, handled: next } : x)) ?? prev);
+    const res = await setRequestHandled(r.id, next);
+    if (!res.ok) {
+      // Revert the optimistic update if the write failed.
+      setItems((prev) => prev?.map((x) => (x.id === r.id ? { ...x, handled: !next } : x)) ?? prev);
+    }
+  }
+
   if (!items) return <Loading label="Loading inbox" />;
   if (items.length === 0)
     return (
@@ -486,7 +507,11 @@ function InboxTab() {
         <div
           key={r.id}
           className={`bg-white border rounded-xl p-3 ${
-            r.urgent ? "border-amber/50 ring-1 ring-amber/30" : "border-brand-100"
+            r.handled
+              ? "border-brand-100 opacity-60"
+              : r.urgent
+                ? "border-amber/50 ring-1 ring-amber/30"
+                : "border-brand-100"
           }`}
         >
           <div className="flex items-center justify-between">
@@ -494,9 +519,14 @@ function InboxTab() {
               <span className="text-xs font-medium capitalize bg-brand-50 text-brand-700 rounded-full px-2 py-0.5">
                 {r.kind}
               </span>
-              {r.urgent && (
+              {r.urgent && !r.handled && (
                 <span className="text-[11px] font-medium bg-amber/15 text-amber border border-amber/30 rounded-full px-2 py-0.5">
                   Urgent
+                </span>
+              )}
+              {r.handled && (
+                <span className="text-[11px] font-medium bg-brand-50 text-brand-700 border border-brand-100 rounded-full px-2 py-0.5">
+                  Handled
                 </span>
               )}
             </span>
@@ -508,6 +538,22 @@ function InboxTab() {
           <p className="text-xs text-ink/60 mt-1">
             {r.name || "Anonymous"} {r.contact ? `· ${r.contact}` : ""}
           </p>
+          <div className="flex gap-2 mt-2">
+            {r.contact && (
+              <a
+                href={contactHref(r.contact)}
+                className="text-xs bg-brand-600 text-white rounded-full px-3 py-1 hover:bg-brand-500 transition"
+              >
+                {isEmail(r.contact) ? "Email back" : "Call back"}
+              </a>
+            )}
+            <button
+              onClick={() => toggleHandled(r)}
+              className="text-xs border border-brand-200 rounded-full px-3 py-1 text-ink/70 hover:border-brand-400 transition"
+            >
+              {r.handled ? "Reopen" : "Mark handled"}
+            </button>
+          </div>
         </div>
       ))}
     </div>

@@ -2,8 +2,9 @@
 
 A full end-to-end test was run against the live deployment on 2026-06-17, and
 re-run after the citation-display fix noted below. All checks passed: 26 core
-checks plus 9 for the connected-answers feature. The live demo was reset to a
-clean, curated state after each run.
+checks, 9 for the connected-answers feature, and 10 for the user-ease features
+(helpful feedback and inbox actions). The live demo was reset to a clean,
+curated state after each run.
 
 **Environment:** https://brightwheel-front-desk.pages.dev (parent) and
 `/operator` (operator), on Cloudflare Pages, Groq as the model with the Workers
@@ -36,6 +37,11 @@ AI fallback. Build is green (`tsc -b && vite build`, functions typecheck clean).
 | | Fever question while viewing as a child | Safety net still intercepts; never answered from the record |
 | | General handbook question while viewing as a child | Still answered from the handbook (Hours & Closures) |
 | | Personal question with no family selected | Does not fabricate; declines and points to the app |
+| Helpful feedback | Thumb down on an answer (`POST /api/feedback`) | Logged as "unhelpful," shown in the operator log, and folded into Gap Radar |
+| | Thumb up on an answer | Logged as "helpful" |
+| | Gap Radar query with feedback coupling | Returns clusters; the unhelpful answer is in the gap set |
+| Inbox actions | `PATCH /api/requests` mark handled | Item flips to handled and sorts below open items; reopen restores it |
+| | Contact action | Renders tap-to-call or tap-to-email from the contact |
 
 ## Offline mode
 
