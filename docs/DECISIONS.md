@@ -20,7 +20,11 @@ The "why" behind the build, the tradeoffs taken, and how it maps to brightwheel.
 
 **Schema-guided JSON over free text.** The model returns one structured object (answer, citations, confidence, escalation, actions) via Workers AI's guided JSON, with tolerant parsing and a fail-safe-to-human fallback. This is what makes citations and confidence reliable.
 
-**Cloudflare end to end.** Pages, Functions, D1, and Workers AI on one platform means the demo is free, needs no external API keys, and persists across devices, which is what makes the operator-edits-then-parent-sees-it loop feel real rather than staged. The LLM provider is isolated behind one function for easy swapping.
+**Groq as the primary model, Workers AI as the floor.** Groq (Llama 3.3 70B, OpenAI-compatible) is fast and free and gives noticeably crisper instruction-following for citations and escalation. But a demo must never go dark, so when `GROQ_API_KEY` is absent or Groq errors, `runJson` falls back to Cloudflare Workers AI automatically. The whole provider lives in one file, so this is a swap, not a rewrite.
+
+**Photo handbook import is onboarding, not magic.** The fastest way to make a real center valuable on day one is to ingest the handbook they already have on paper. A vision model OCRs the photos into structured sections, but the model never writes directly to the source of truth: the operator reviews every drafted section, the merge is non-destructive (append, never overwrite), and review is the explicit mitigation for any text injected into a photo.
+
+**Cloudflare end to end.** Pages, Functions, D1, and Workers AI on one platform means the demo is free, persists across devices, and keeps the fallback path keyless, which is what makes the operator-edits-then-parent-sees-it loop feel real rather than staged.
 
 **Open operator console for the demo.** Operator routes are open by default so a reviewer can explore both sides immediately. `OPERATOR_PASSCODE` gates them when set; a real deployment would fail closed. This is a deliberate demo tradeoff, not an oversight.
 
@@ -34,8 +38,7 @@ The "why" behind the build, the tradeoffs taken, and how it maps to brightwheel.
 
 ## What I would build next
 
-- Twilio so the same brain answers SMS and the after-hours phone line.
-- Per-center theming and a shared policy library across a chain of centers.
-- A weekly digest of what changed and what parents kept asking.
-- Retrieval once a handbook outgrows a single prompt.
-- Human-in-the-loop review on taught entries before they go live, and a fail-closed operator login.
+See the roadmap in [explanation.md](explanation.md): SMS and after-hours voice
+via Twilio, per-center theming and a shared policy library, a weekly operator
+digest, retrieval once a handbook outgrows one prompt, and a fail-closed
+operator login with human review on taught entries.

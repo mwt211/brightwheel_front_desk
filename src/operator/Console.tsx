@@ -264,19 +264,28 @@ function GapCard({
           className="w-full text-sm bg-cream border border-brand-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-brand-400 resize-y"
         />
       </div>
-      <button
-        onClick={async () => {
-          setSaving(true);
-          cluster.draftSection.title = title;
-          cluster.draftSection.body = body;
-          await onApprove();
-          setSaving(false);
-        }}
-        disabled={saving}
-        className="text-sm bg-brand-600 text-white rounded-full px-4 py-2 disabled:opacity-50"
-      >
-        {saving ? "Teaching..." : "Approve & teach the bot"}
-      </button>
+      {cluster.reviewOnly ? (
+        // Health and safety themes are never published with one tap. The
+        // operator reviews and, if appropriate, adds a section by hand.
+        <p className="text-xs text-amber">
+          Health and safety topics are not taught with one tap. Review this with
+          staff and, if appropriate, add a section manually in the Handbook tab.
+        </p>
+      ) : (
+        <button
+          onClick={async () => {
+            setSaving(true);
+            cluster.draftSection.title = title;
+            cluster.draftSection.body = body;
+            await onApprove();
+            setSaving(false);
+          }}
+          disabled={saving}
+          className="text-sm bg-brand-600 text-white rounded-full px-4 py-2 disabled:opacity-50"
+        >
+          {saving ? "Teaching..." : "Approve & teach the bot"}
+        </button>
+      )}
     </div>
   );
 }
