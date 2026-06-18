@@ -97,9 +97,9 @@ that underpins both. For how they fit together see
 - **What:** Gap Radar themes that touch health, illness, medication, allergy, injury, or safety are flagged review-only and cannot be taught with one tap; the operator must add them by hand after review.
 - **Why:** Medical content must never be auto-published by a model. This keeps a human in the loop for exactly the content where a mistake is most costly.
 
-### Snap a photo of your handbook
-- **What:** The operator uploads photos of a paper handbook; a vision model transcribes and structures them into editable sections, lists the section titles it drafted for confirmation, and on approval merges them into the editor to review and save. The merge is non-destructive: a section whose title already exists is added separately (suffixed "(imported)") rather than overwriting existing content.
-- **Why:** It takes real work off the operator's plate. A brand-new center goes from a paper binder to a working AI front desk in minutes, with no retyping, so staff spend their time with the children.
+### Onboard from your handbook (photo or upload)
+- **What:** The operator takes a photo or uploads images of a handbook; a vision model transcribes and structures them into editable sections, lists the section titles it drafted for confirmation, and on approval merges them into the editor to review and save. The merge is non-destructive: a section whose title already exists is added separately (suffixed "(imported)") rather than overwriting existing content. A prompt on the operator's first screen points a new center straight to it.
+- **Why:** It takes real work off the operator's plate. A brand-new center goes from a binder to a working AI front desk in minutes, with no retyping, so staff spend their time with the children.
 
 ### Urgent-message triage
 - **What:** The inbox of tour requests and messages flags time-sensitive ones (words like fever, sick, hurt, emergency, "today," "asap," and Spanish equivalents such as fiebre, enfermo, hoy) and floats them to the top.

@@ -65,12 +65,41 @@ export function Console() {
       </header>
 
       <div className="p-4">
-        {tab === "questions" && <QuestionsTab />}
+        {tab === "questions" && (
+          <>
+            <OnboardBanner onOpen={() => setTab("kb")} />
+            <QuestionsTab />
+          </>
+        )}
         {tab === "gaps" && <GapsTab />}
         {tab === "kb" && <KbTab />}
         {tab === "inbox" && <InboxTab />}
         {tab === "activity" && <ActivityTab />}
       </div>
+    </div>
+  );
+}
+
+// ---------- Onboarding prompt (operator's first screen) ----------
+
+function OnboardBanner({ onOpen }: { onOpen: () => void }) {
+  return (
+    <div className="bg-brand-50 border border-brand-100 rounded-xl p-3 mb-3 flex items-center justify-between gap-3">
+      <div>
+        <p className="text-sm font-semibold text-brand-800">
+          New center? Onboard your handbook in minutes
+        </p>
+        <p className="text-[11px] text-ink/60">
+          Take a photo or upload your existing handbook and we draft the
+          sections for you to review. No retyping.
+        </p>
+      </div>
+      <button
+        onClick={onOpen}
+        className="shrink-0 text-sm bg-brand-700 text-white rounded-full px-4 py-2 hover:bg-brand-600 transition"
+      >
+        Add your handbook
+      </button>
     </div>
   );
 }

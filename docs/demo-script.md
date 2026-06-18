@@ -22,7 +22,7 @@ On the parent tab, tap the starters in order:
 Switch to the operator tab:
 - Impact view: "Staff time saved, answer rate, top topics. Less admin, more impact."
 - Inbox: "Urgent messages are triaged to the top." Point at the flagged fever pickup.
-- Handbook tab, "Import from a photo": "A brand-new center can onboard in minutes. Snap the paper handbook and we draft the sections." Upload `docs/sample-handbook.png` and watch the new sections appear for review.
+- Operator first screen shows an "Onboard your handbook" prompt; open the Handbook tab, "Take a photo or upload": "A brand-new center can onboard in minutes. Take a photo or upload the handbook and we draft the sections." Upload `docs/sample-handbook.png` and watch the new sections appear for review.
 - Gap Radar: click "Scan for gaps." "It groups the questions the bot could not answer and drafts a handbook entry for each. Health topics are flagged review-only." Approve the swimming-pool draft.
 - Back to the parent tab, ask "Do you have a swimming pool?" again. It now answers with a citation. "One tap, and the front desk taught itself."
 

@@ -48,7 +48,7 @@ The center is fictional (Cottonwood Sprouts Early Learning, Albuquerque NM) and 
 - **Impact dashboard** ("Less admin. More impact."): estimated staff time saved, answer rate, and top topics.
 - **Question log** with answered / escalated / gap counts and filters.
 - **Gap Radar**: clusters the questions the bot could not answer, drafts a handbook entry for each, and lets the operator approve it in one tap. Health topics are flagged review-only and never auto-taught.
-- **Snap a photo of your handbook**: upload photos of a paper handbook and a vision model drafts editable sections to review into the knowledge base.
+- **Onboard from your handbook (photo or upload)**: take a photo or upload images of a handbook and a vision model drafts editable sections to review into the knowledge base; a prompt on the operator's first screen points there.
 - **Inbox** with urgent messages triaged to the top, plus one-tap call/email and a mark-handled toggle.
 - **Handbook editor** (the single source of truth) with optimistic-locked saves, plus an activity trail.
 
