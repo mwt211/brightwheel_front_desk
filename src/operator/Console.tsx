@@ -624,11 +624,11 @@ function PhotoImport({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-brand-800">
-            Onboard from your paper handbook
+            Onboard from your handbook
           </p>
           <p className="text-[11px] text-ink/60">
-            Snap a photo of your handbook and we'll draft the sections for you to
-            review. No retyping.
+            Take a photo or upload an image of each page and we draft the
+            sections for you to review. No retyping.
           </p>
         </div>
         <label
@@ -636,11 +636,10 @@ function PhotoImport({
             busy ? "bg-brand-300 text-white" : "bg-brand-700 text-white hover:bg-brand-600"
           }`}
         >
-          {busy ? "Reading..." : "Choose photos"}
+          {busy ? "Reading..." : "Take a photo or upload"}
           <input
             type="file"
             accept="image/*"
-            capture="environment"
             multiple
             hidden
             disabled={busy}
